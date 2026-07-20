@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./lib/auth-context";
+import { WishlistProvider } from "./lib/wishlist-context";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -7,6 +8,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Home } from "./pages/Home";
 import { Listings } from "./pages/Listings";
 import { ListingDetail } from "./pages/ListingDetail";
+import { Wishlist } from "./pages/Wishlist";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 
@@ -26,6 +28,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <WishlistProvider>
         <div className="flex min-h-screen flex-col bg-ink-50">
           <Navbar />
           <main className="flex-1">
@@ -33,6 +36,7 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/listings" element={<Listings />} />
               <Route path="/listings/:id" element={<ListingDetail />} />
+              <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
@@ -74,6 +78,7 @@ export default function App() {
           </main>
           <Footer />
         </div>
+        </WishlistProvider>
       </AuthProvider>
     </BrowserRouter>
   );

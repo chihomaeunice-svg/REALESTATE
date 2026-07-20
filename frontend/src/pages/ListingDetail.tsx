@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { BedDouble, Bath, Ruler, MapPin, Phone, CheckCircle2 } from "lucide-react";
+import { BedDouble, Bath, Ruler, MapPin, Phone, CheckCircle2, ShieldCheck, Calendar } from "lucide-react";
 import { api, type Listing } from "../lib/api";
 import { formatTZS, formatDate } from "../lib/format";
 import { VerifiedBadge } from "../components/VerifiedBadge";
-import { PROPERTY_TYPE_LABEL } from "../lib/constants";
+import { WishlistButton } from "../components/WishlistButton";
+import { PROPERTY_TYPE_LABEL, NO_UNIT_TYPES } from "../lib/constants";
 
 export function ListingDetail() {
   const { id } = useParams();
@@ -34,6 +35,7 @@ export function ListingDetail() {
   }
 
   const image = listing.images?.[0] ?? `https://picsum.photos/seed/${listing.id}/1200/800`;
+  const isLand = NO_UNIT_TYPES.has(listing.property_type);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
@@ -52,25 +54,45 @@ export function ListingDetail() {
                 <MapPin className="h-4 w-4" /> {listing.ward}, {listing.district}, {listing.city}
               </p>
             </div>
-            <VerifiedBadge status={listing.verification} />
+            <div className="flex items-center gap-2">
+              <VerifiedBadge status={listing.verification} />
+              <WishlistButton listingId={listing.id} variant="inline" />
+            </div>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-4 text-sm text-ink-600">
             <span className="rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-ink-100">
               {PROPERTY_TYPE_LABEL[listing.property_type] ?? listing.property_type}
             </span>
-            {listing.bedrooms > 0 && (
-              <span className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-ink-100">
-                <BedDouble className="h-4 w-4" /> {listing.bedrooms} bed
-              </span>
-            )}
-            {listing.bathrooms > 0 && (
-              <span className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-ink-100">
-                <Bath className="h-4 w-4" /> {listing.bathrooms} bath
-              </span>
+            {isLand ? (
+              <>
+                {listing.land_size_acres && (
+                  <span className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-ink-100">
+                    <Ruler className="h-4 w-4" /> {listing.land_size_acres} acres
+                  </span>
+                )}
+                {listing.title_deed_status && (
+                  <span className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-ink-100">
+                    <ShieldCheck className="h-4 w-4" /> {listing.title_deed_status}
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                {listing.bedrooms > 0 && (
+                  <span className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-ink-100">
+                    <BedDouble className="h-4 w-4" /> {listing.bedrooms} bed
+                  </span>
+                )}
+                {listing.bathrooms > 0 && (
+                  <span className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-ink-100">
+                    <Bath className="h-4 w-4" /> {listing.bathrooms} bath
+                  </span>
+                )}
+              </>
             )}
             <span className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-ink-100">
-              <Ruler className="h-4 w-4" /> Listed {formatDate(listing.created_at)}
+              <Calendar className="h-4 w-4" /> Listed {formatDate(listing.created_at)}
             </span>
           </div>
 
@@ -85,7 +107,9 @@ export function ListingDetail() {
         <aside className="card sticky top-24 h-fit p-6">
           <p className="text-3xl font-semibold text-ink-900">
             {formatTZS(listing.price)}
-            <span className="text-base font-normal text-ink-400">/{listing.price_period}</span>
+            {listing.price_period !== "total" && (
+              <span className="text-base font-normal text-ink-400">/{listing.price_period}</span>
+            )}
           </p>
           <p className="mt-1 text-sm text-ink-500">
             {listing.purpose === "rent" ? "Available for rent" : "Available for sale"}

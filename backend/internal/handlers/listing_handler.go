@@ -74,7 +74,7 @@ const listingSelectFields = `
 	l.id, l.property_id, l.unit_id, l.purpose, l.title, l.description, l.price, l.price_period,
 	l.status, l.contact_phone, l.view_count, l.created_at,
 	p.district, p.ward, p.city, p.property_type, p.verification,
-	u.bedrooms, u.bathrooms
+	u.bedrooms, u.bathrooms, p.land_size_acres, p.title_deed_status
 `
 
 func scanListing(row interface{ Scan(dest ...any) error }) (models.Listing, error) {
@@ -84,7 +84,7 @@ func scanListing(row interface{ Scan(dest ...any) error }) (models.Listing, erro
 		&l.ID, &l.PropertyID, &l.UnitID, &l.Purpose, &l.Title, &l.Description, &l.Price, &l.PricePeriod,
 		&l.Status, &l.ContactPhone, &l.ViewCount, &l.CreatedAt,
 		&l.District, &l.Ward, &l.City, &l.PropertyType, &l.Verification,
-		&bedrooms, &bathrooms,
+		&bedrooms, &bathrooms, &l.LandSizeAcres, &l.TitleDeedStatus,
 	)
 	if bedrooms != nil {
 		l.Bedrooms = *bedrooms

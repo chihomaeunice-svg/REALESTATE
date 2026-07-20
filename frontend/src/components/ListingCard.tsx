@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
-import { BedDouble, Bath, MapPin } from "lucide-react";
+import { BedDouble, Bath, MapPin, Ruler } from "lucide-react";
 import type { Listing } from "../lib/api";
 import { formatTZS } from "../lib/format";
 import { VerifiedBadge } from "./VerifiedBadge";
-import { PROPERTY_TYPE_LABEL } from "../lib/constants";
+import { WishlistButton } from "./WishlistButton";
+import { PROPERTY_TYPE_LABEL, NO_UNIT_TYPES } from "../lib/constants";
 
 export function ListingCard({ listing }: { listing: Listing }) {
   const image = listing.images?.[0] ?? placeholderFor(listing.id);
+  const isLand = NO_UNIT_TYPES.has(listing.property_type);
 
   return (
     <Link
@@ -23,14 +25,19 @@ export function ListingCard({ listing }: { listing: Listing }) {
         <div className="absolute left-3 top-3">
           <VerifiedBadge status={listing.verification} />
         </div>
-        <div className="absolute right-3 top-3 rounded-full bg-ink-950/70 px-2.5 py-1 text-xs font-semibold text-white">
+        <div className="absolute right-3 top-3 flex items-center gap-2">
+          <WishlistButton listingId={listing.id} />
+        </div>
+        <div className="absolute bottom-3 right-3 rounded-full bg-ink-950/70 px-2.5 py-1 text-xs font-semibold text-white">
           {listing.purpose === "rent" ? "For rent" : "For sale"}
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <p className="text-lg font-semibold text-ink-900">
           {formatTZS(listing.price)}
-          <span className="text-sm font-normal text-ink-400">/{listing.price_period}</span>
+          {listing.price_period !== "total" && (
+            <span className="text-sm font-normal text-ink-400">/{listing.price_period}</span>
+          )}
         </p>
         <h3 className="line-clamp-1 text-sm font-medium text-ink-700">{listing.title}</h3>
         <p className="flex items-center gap-1 text-xs text-ink-400">
@@ -41,7 +48,13 @@ export function ListingCard({ listing }: { listing: Listing }) {
           <span className="rounded-md bg-ink-50 px-2 py-1 font-medium">
             {PROPERTY_TYPE_LABEL[listing.property_type] ?? listing.property_type}
           </span>
-          {listing.property_type !== "shop" && listing.property_type !== "office" && (
+          {isLand ? (
+            listing.land_size_acres && (
+              <span className="flex items-center gap-1">
+                <Ruler className="h-3.5 w-3.5" /> {listing.land_size_acres} acres
+              </span>
+            )
+          ) : listing.property_type !== "shop" && listing.property_type !== "office" ? (
             <>
               <span className="flex items-center gap-1">
                 <BedDouble className="h-3.5 w-3.5" /> {listing.bedrooms}
@@ -50,7 +63,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
                 <Bath className="h-3.5 w-3.5" /> {listing.bathrooms}
               </span>
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </Link>

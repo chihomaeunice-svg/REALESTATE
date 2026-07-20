@@ -35,6 +35,7 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 	reportH := &handlers.ReportHandler{DB: db}
 	adminH := &handlers.AdminHandler{DB: db}
 	subH := &handlers.SubscriptionHandler{DB: db}
+	favH := &handlers.FavoriteHandler{DB: db}
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
@@ -94,6 +95,13 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 			r.Get("/leases/{id}/document", leaseH.Document)
 			r.Post("/leases/{id}/sign", leaseH.Sign)
 			r.Post("/payments/mpesa/stk-push", payH.StkPush)
+
+			// Wishlist/favorites: any authenticated role can save listings
+			r.Get("/favorites", favH.List)
+			r.Get("/favorites/ids", favH.IDs)
+			r.Post("/favorites", favH.Add)
+			r.Post("/favorites/sync", favH.Sync)
+			r.Delete("/favorites/{listingID}", favH.Remove)
 
 			// Admin: verification queue
 			r.Group(func(r chi.Router) {

@@ -28,6 +28,8 @@ type Property struct {
 	City         string    `json:"city"`
 	Latitude     *float64  `json:"latitude,omitempty"`
 	Longitude    *float64  `json:"longitude,omitempty"`
+	LandSizeAcres *float64 `json:"land_size_acres,omitempty"`
+	TitleDeedStatus *string `json:"title_deed_status,omitempty"`
 	Verification string    `json:"verification"`
 	CreatedAt    time.Time `json:"created_at"`
 }
@@ -67,6 +69,15 @@ type Listing struct {
 	Images       []string `json:"images,omitempty"`
 	Bedrooms     int      `json:"bedrooms"`
 	Bathrooms    int      `json:"bathrooms"`
+	LandSizeAcres   *float64 `json:"land_size_acres,omitempty"`
+	TitleDeedStatus *string  `json:"title_deed_status,omitempty"`
+}
+
+type Favorite struct {
+	ID        string    `json:"id"`
+	UserID    string    `json:"user_id"`
+	ListingID string    `json:"listing_id"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Inquiry struct {
