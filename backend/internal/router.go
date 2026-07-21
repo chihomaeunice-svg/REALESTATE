@@ -1,0 +1,110 @@
+package internal
+
+import (
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	chimw "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"realestate-backend/internal/handlers"
+	"realestate-backend/internal/httpx"
+	appmw "realestate-backend/internal/middleware"
+)
+
+func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
+	r := chi.NewRouter()
+	r.Use(chimw.Logger)
+	r.Use(chimw.Recoverer)
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
+
+	authH := &handlers.AuthHandler{DB: db, JWTSecret: jwtSecret}
+	propH := &handlers.PropertyHandler{DB: db}
+	listH := &handlers.ListingHandler{DB: db}
+	tenantH := &handlers.TenantHandler{DB: db}
+	leaseH := &handlers.LeaseHandler{DB: db}
+	payH := &handlers.PaymentHandler{DB: db}
+	reportH := &handlers.ReportHandler{DB: db}
+	adminH := &handlers.AdminHandler{DB: db}
+	subH := &handlers.SubscriptionHandler{DB: db}
+
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	})
+
+	r.Route("/api", func(r chi.Router) {
+		// --- Public: auth ---
+		r.Post("/auth/register", authH.Register)
+		r.Post("/auth/login", authH.Login)
+
+		// --- Public: Layer 1 marketplace ---
+		r.Get("/listings", listH.Browse)
+		r.Get("/listings/{id}", listH.Get)
+		r.Post("/listings/{id}/inquiries", listH.CreateInquiry)
+		r.Get("/properties/{id}", propH.Get)
+
+		// --- Authenticated ---
+		r.Group(func(r chi.Router) {
+			r.Use(appmw.Auth(jwtSecret))
+
+			r.Get("/me", func(w http.ResponseWriter, r *http.Request) {
+				authH.Me(w, r, appmw.UserID(r))
+			})
+
+			// Landlord + agent: Layer 1 listing management
+			r.Group(func(r chi.Router) {
+				r.Use(appmw.RequireRole("landlord", "agent"))
+				r.Post("/properties", propH.Create)
+				r.Get("/properties", propH.ListMine)
+				r.Post("/properties/{id}/units", propH.CreateUnit)
+				r.Get("/properties/{id}/units", propH.ListUnits)
+				r.Get("/units", propH.ListAllUnitsForLandlord)
+				r.Post("/listings", listH.Create)
+				r.Get("/inquiries", listH.ListInquiriesForLandlord)
+
+				// Layer 2: management suite
+				r.Get("/tenants", tenantH.ListForLandlord)
+				r.Post("/leases", leaseH.Create)
+				r.Get("/leases", leaseH.ListForLandlord)
+				r.Post("/payments/manual", payH.LogManual)
+				r.Get("/arrears", payH.ArrearsForLandlord)
+				r.Get("/reports/summary", reportH.Summary)
+				r.Get("/reports/by-building", reportH.ByBuilding)
+				r.Get("/subscription", subH.GetMine)
+			})
+
+			// Tenant: Layer 3 portal
+			r.Group(func(r chi.Router) {
+				r.Use(appmw.RequireRole("tenant"))
+				r.Get("/tenant/me", tenantH.GetForTenantUser)
+				r.Get("/tenant/leases", leaseH.ListForTenant)
+			})
+
+			// Shared lease-scoped resources (ownership enforced inside handlers)
+			r.Get("/leases/{id}/schedules", payH.ListSchedulesForLease)
+			r.Get("/leases/{id}/payments", payH.ListPaymentsForLease)
+			r.Get("/leases/{id}/document", leaseH.Document)
+			r.Post("/leases/{id}/sign", leaseH.Sign)
+			r.Post("/payments/mpesa/stk-push", payH.StkPush)
+
+			// Admin: verification queue
+			r.Group(func(r chi.Router) {
+				r.Use(appmw.RequireRole("admin"))
+				r.Get("/admin/pending-users", adminH.PendingUsers)
+				r.Get("/admin/pending-properties", adminH.PendingProperties)
+				r.Post("/admin/users/{id}/decide", adminH.DecideUser)
+				r.Post("/admin/properties/{id}/decide", adminH.DecideProperty)
+			})
+		})
+	})
+
+	return r
+}

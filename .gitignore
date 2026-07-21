@@ -1,0 +1,9 @@
+# Go
+backend/tmp/
+backend/*.exe
+backend/nyumbayangu-api
+*.log
+
+# Env files
+.env
+.env.local
