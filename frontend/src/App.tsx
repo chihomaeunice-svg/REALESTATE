@@ -22,6 +22,7 @@ import { Reports } from "./pages/landlord/Reports";
 import { Subscription } from "./pages/landlord/Subscription";
 
 import { TenantPortal } from "./pages/tenant/TenantPortal";
+import { TenantProfile } from "./pages/tenant/Profile";
 import { AdminVerification } from "./pages/admin/AdminVerification";
 
 export default function App() {
@@ -62,6 +63,14 @@ export default function App() {
                 element={
                   <ProtectedRoute roles={["tenant"]}>
                     <TenantPortal />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tenant/profile"
+                element={
+                  <ProtectedRoute roles={["tenant"]}>
+                    <TenantProfile />
                   </ProtectedRoute>
                 }
               />

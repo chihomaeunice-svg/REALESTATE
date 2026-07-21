@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { FileText, MapPin, Smartphone } from "lucide-react";
+import { Link } from "react-router-dom";
+import { FileText, MapPin, Smartphone, UserCircle2 } from "lucide-react";
 import { api, type Lease, type PaymentSchedule, type Payment } from "../../lib/api";
 import { formatTZS, formatDate, formatDateTime } from "../../lib/format";
 import { ScheduleTable } from "../../components/ScheduleTable";
@@ -52,13 +53,24 @@ export function TenantPortal() {
         <p className="mt-2 text-ink-500">
           Once your landlord creates a lease for you using this phone number, it will show up here.
         </p>
+        <Link to="/tenant/profile" className="btn-primary mt-6 inline-flex">
+          <UserCircle2 className="h-4 w-4" /> Set up your profile now
+        </Link>
+        <p className="mt-2 text-xs text-ink-400">
+          Landlords can find your details instantly when drafting a lease if you fill this in ahead of time.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <h1 className="mb-6 text-2xl font-semibold text-ink-900">My rental</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-ink-900">My rental</h1>
+        <Link to="/tenant/profile" className="flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700">
+          <UserCircle2 className="h-4 w-4" /> My profile
+        </Link>
+      </div>
 
       {leases.length > 1 && (
         <select className="input mb-6 !w-auto" value={activeLeaseId ?? ""} onChange={(e) => setActiveLeaseId(e.target.value)}>
