@@ -3,7 +3,7 @@ import { Plus, ChevronDown, ChevronUp, MapPin, X } from "lucide-react";
 import { api, type Property, type Unit } from "../../lib/api";
 import { formatTZS } from "../../lib/format";
 import { VerifiedBadge } from "../../components/VerifiedBadge";
-import { DAR_DISTRICTS, PROPERTY_TYPES } from "../../lib/constants";
+import { DAR_DISTRICTS, PROPERTY_TYPES, NO_UNIT_TYPES } from "../../lib/constants";
 import { useAuth } from "../../lib/auth-context";
 
 export function Properties() {
@@ -48,7 +48,11 @@ export function Properties() {
               {expanded === p.id ? <ChevronUp className="h-5 w-5 text-ink-400" /> : <ChevronDown className="h-5 w-5 text-ink-400" />}
             </button>
 
-            {expanded === p.id && <UnitsPanel property={p} landlordPhone={user?.phone ?? ""} />}
+            {expanded === p.id && (
+              NO_UNIT_TYPES.has(p.property_type)
+                ? <LandListingPanel property={p} landlordPhone={user?.phone ?? ""} />
+                : <UnitsPanel property={p} landlordPhone={user?.phone ?? ""} />
+            )}
           </div>
         ))}
       </div>
@@ -57,16 +61,33 @@ export function Properties() {
 }
 
 function NewPropertyForm({ onDone, onCancel }: { onDone: () => void; onCancel: () => void }) {
-  const [form, setForm] = useState({ title: "", property_type: "apartment", district: DAR_DISTRICTS[0], ward: "", address_line: "" });
+  const [form, setForm] = useState({
+    title: "",
+    property_type: "apartment",
+    district: DAR_DISTRICTS[0],
+    ward: "",
+    address_line: "",
+    land_size_acres: "",
+    title_deed_status: "",
+  });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const isLand = NO_UNIT_TYPES.has(form.property_type);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setError("");
     try {
-      await api.post("/properties", form);
+      await api.post("/properties", {
+        title: form.title,
+        property_type: form.property_type,
+        district: form.district,
+        ward: form.ward,
+        address_line: form.address_line || undefined,
+        land_size_acres: isLand && form.land_size_acres ? Number(form.land_size_acres) : undefined,
+        title_deed_status: isLand && form.title_deed_status ? form.title_deed_status : undefined,
+      });
       onDone();
     } catch {
       setError("Could not create property.");
@@ -106,11 +127,77 @@ function NewPropertyForm({ onDone, onCancel }: { onDone: () => void; onCancel: (
           <label className="label">Address (optional)</label>
           <input className="input" value={form.address_line} onChange={(e) => setForm({ ...form, address_line: e.target.value })} />
         </div>
+        {isLand && (
+          <>
+            <div>
+              <label className="label">Plot size (acres)</label>
+              <input type="number" step="0.01" min={0} className="input" value={form.land_size_acres} onChange={(e) => setForm({ ...form, land_size_acres: e.target.value })} />
+            </div>
+            <div>
+              <label className="label">Title deed status</label>
+              <input className="input" placeholder="e.g. Full title deed, Letter of offer" value={form.title_deed_status} onChange={(e) => setForm({ ...form, title_deed_status: e.target.value })} />
+            </div>
+          </>
+        )}
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button type="submit" disabled={submitting} className="btn-primary">{submitting ? "Creating…" : "Create property"}</button>
       <p className="text-xs text-ink-400">New properties enter admin review before they can be listed publicly.</p>
     </form>
+  );
+}
+
+function LandListingPanel({ property, landlordPhone }: { property: Property; landlordPhone: string }) {
+  const [form, setForm] = useState({ price: 0, price_period: "total", description: "" });
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [published, setPublished] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      await api.post("/listings", {
+        property_id: property.id,
+        purpose: form.price_period === "total" ? "sale" : "rent",
+        title: property.title,
+        description: form.description || undefined,
+        price: form.price,
+        price_period: form.price_period,
+        contact_phone: landlordPhone,
+        images: [`https://picsum.photos/seed/${property.id}/900/600`],
+      });
+      setPublished(true);
+    } catch {
+      setError("Could not publish listing.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="mt-4 border-t border-ink-100 pt-4">
+      <div className="mb-3 flex flex-wrap gap-3 text-sm text-ink-500">
+        {property.land_size_acres && <span>{property.land_size_acres} acres</span>}
+        {property.title_deed_status && <span>· {property.title_deed_status}</span>}
+      </div>
+      {published ? (
+        <p className="text-sm font-medium text-brand-700">Listing published — it's now live on the public marketplace.</p>
+      ) : (
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+          <select className="input" value={form.price_period} onChange={(e) => setForm({ ...form, price_period: e.target.value })}>
+            <option value="total">For sale (total price)</option>
+            <option value="month">For rent (per month)</option>
+            <option value="year">For rent (per year)</option>
+          </select>
+          <input required type="number" min={0} placeholder="Price (TZS)" className="input" value={form.price || ""} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
+          <input placeholder="Short description (optional)" className="input sm:col-span-1" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <button type="submit" disabled={submitting} className="btn-primary">{submitting ? "Publishing…" : "Publish listing"}</button>
+          {error && <p className="col-span-full text-sm text-red-600">{error}</p>}
+        </form>
+      )}
+    </div>
   );
 }
 

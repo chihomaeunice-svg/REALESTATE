@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus } from "lucide-react";
-import { api, type Lease } from "../../lib/api";
+import { Plus, CheckCircle2, Search } from "lucide-react";
+import { api, ApiError, type Lease, type Tenant } from "../../lib/api";
 import { formatTZS, formatDate } from "../../lib/format";
 
 const STATUS_STYLE: Record<string, string> = {
@@ -67,6 +67,8 @@ function NewLeaseForm({ onDone, onCancel }: { onDone: () => void; onCancel: () =
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [lookupState, setLookupState] = useState<"idle" | "checking" | "found" | "not-found">("idle");
+  const [foundProfile, setFoundProfile] = useState<Tenant | null>(null);
 
   useEffect(() => {
     api.get<typeof units>("/units").then((all) => setUnits(all.filter((u) => u.status === "vacant")));
@@ -75,6 +77,20 @@ function NewLeaseForm({ onDone, onCancel }: { onDone: () => void; onCancel: () =
   function selectUnit(unitId: string) {
     const unit = units.find((u) => u.id === unitId);
     setForm((f) => ({ ...f, unit_id: unitId, rent_amount: unit?.rent_amount ?? 0, deposit_amount: unit?.rent_amount ?? 0 }));
+  }
+
+  async function lookupTenant() {
+    if (!form.tenant_phone) return;
+    setLookupState("checking");
+    try {
+      const tenant = await api.get<Tenant>(`/tenants/lookup?phone=${encodeURIComponent(form.tenant_phone)}`);
+      setFoundProfile(tenant);
+      setForm((f) => ({ ...f, tenant_full_name: tenant.full_name }));
+      setLookupState("found");
+    } catch (err) {
+      setFoundProfile(null);
+      setLookupState(err instanceof ApiError && err.status === 404 ? "not-found" : "idle");
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -122,7 +138,30 @@ function NewLeaseForm({ onDone, onCancel }: { onDone: () => void; onCancel: () =
         </div>
         <div>
           <label className="label">Tenant phone</label>
-          <input required className="input" placeholder="+255…" value={form.tenant_phone} onChange={(e) => setForm({ ...form, tenant_phone: e.target.value })} />
+          <div className="flex gap-2">
+            <input
+              required
+              className="input"
+              placeholder="+255…"
+              value={form.tenant_phone}
+              onChange={(e) => { setForm({ ...form, tenant_phone: e.target.value }); setLookupState("idle"); }}
+              onBlur={lookupTenant}
+            />
+            <button type="button" onClick={lookupTenant} className="btn-secondary shrink-0 !px-3" title="Look up existing profile">
+              <Search className="h-4 w-4" />
+            </button>
+          </div>
+          {lookupState === "found" && foundProfile && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-brand-700">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Existing profile found — {foundProfile.full_name}
+              {foundProfile.nida_number ? ", NIDA on file" : ""}
+              {foundProfile.emergency_contact ? ", emergency contact on file" : ""}.
+            </p>
+          )}
+          {lookupState === "not-found" && (
+            <p className="mt-1.5 text-xs text-ink-400">No profile yet for this number — fill in their details below.</p>
+          )}
         </div>
         <div>
           <label className="label">Lease language</label>

@@ -17,15 +17,17 @@ type PropertyHandler struct {
 }
 
 type propertyRequest struct {
-	Title        string   `json:"title"`
-	Description  *string  `json:"description"`
-	PropertyType string   `json:"property_type"`
-	District     string   `json:"district"`
-	Ward         string   `json:"ward"`
-	AddressLine  *string  `json:"address_line"`
-	City         *string  `json:"city"`
-	Latitude     *float64 `json:"latitude"`
-	Longitude    *float64 `json:"longitude"`
+	Title           string   `json:"title"`
+	Description     *string  `json:"description"`
+	PropertyType    string   `json:"property_type"`
+	District        string   `json:"district"`
+	Ward            string   `json:"ward"`
+	AddressLine     *string  `json:"address_line"`
+	City            *string  `json:"city"`
+	Latitude        *float64 `json:"latitude"`
+	Longitude       *float64 `json:"longitude"`
+	LandSizeAcres   *float64 `json:"land_size_acres"`
+	TitleDeedStatus *string  `json:"title_deed_status"`
 }
 
 func (h *PropertyHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -46,11 +48,11 @@ func (h *PropertyHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var p models.Property
 	err := h.DB.QueryRow(context.Background(), `
-		INSERT INTO properties (owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, verification)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'pending')
-		RETURNING id, owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, verification, created_at
-	`, ownerID, req.Title, req.Description, req.PropertyType, req.District, req.Ward, req.AddressLine, city, req.Latitude, req.Longitude).Scan(
-		&p.ID, &p.OwnerID, &p.Title, &p.Description, &p.PropertyType, &p.District, &p.Ward, &p.AddressLine, &p.City, &p.Latitude, &p.Longitude, &p.Verification, &p.CreatedAt,
+		INSERT INTO properties (owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, land_size_acres, title_deed_status, verification)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'pending')
+		RETURNING id, owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, land_size_acres, title_deed_status, verification, created_at
+	`, ownerID, req.Title, req.Description, req.PropertyType, req.District, req.Ward, req.AddressLine, city, req.Latitude, req.Longitude, req.LandSizeAcres, req.TitleDeedStatus).Scan(
+		&p.ID, &p.OwnerID, &p.Title, &p.Description, &p.PropertyType, &p.District, &p.Ward, &p.AddressLine, &p.City, &p.Latitude, &p.Longitude, &p.LandSizeAcres, &p.TitleDeedStatus, &p.Verification, &p.CreatedAt,
 	)
 	if err != nil {
 		httpx.Error(w, http.StatusInternalServerError, "could not create property: "+err.Error())
@@ -59,10 +61,18 @@ func (h *PropertyHandler) Create(w http.ResponseWriter, r *http.Request) {
 	httpx.JSON(w, http.StatusCreated, p)
 }
 
+const propertySelectFields = `id, owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, land_size_acres, title_deed_status, verification, created_at`
+
+func scanProperty(row interface{ Scan(dest ...any) error }) (models.Property, error) {
+	var p models.Property
+	err := row.Scan(&p.ID, &p.OwnerID, &p.Title, &p.Description, &p.PropertyType, &p.District, &p.Ward, &p.AddressLine, &p.City, &p.Latitude, &p.Longitude, &p.LandSizeAcres, &p.TitleDeedStatus, &p.Verification, &p.CreatedAt)
+	return p, err
+}
+
 func (h *PropertyHandler) ListMine(w http.ResponseWriter, r *http.Request) {
 	ownerID := middleware.UserID(r)
 	rows, err := h.DB.Query(context.Background(), `
-		SELECT id, owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, verification, created_at
+		SELECT `+propertySelectFields+`
 		FROM properties WHERE owner_id=$1 ORDER BY created_at DESC
 	`, ownerID)
 	if err != nil {
@@ -73,8 +83,8 @@ func (h *PropertyHandler) ListMine(w http.ResponseWriter, r *http.Request) {
 
 	properties := []models.Property{}
 	for rows.Next() {
-		var p models.Property
-		if err := rows.Scan(&p.ID, &p.OwnerID, &p.Title, &p.Description, &p.PropertyType, &p.District, &p.Ward, &p.AddressLine, &p.City, &p.Latitude, &p.Longitude, &p.Verification, &p.CreatedAt); err != nil {
+		p, err := scanProperty(rows)
+		if err != nil {
 			continue
 		}
 		properties = append(properties, p)
@@ -84,11 +94,8 @@ func (h *PropertyHandler) ListMine(w http.ResponseWriter, r *http.Request) {
 
 func (h *PropertyHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	var p models.Property
-	err := h.DB.QueryRow(context.Background(), `
-		SELECT id, owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, verification, created_at
-		FROM properties WHERE id=$1
-	`, id).Scan(&p.ID, &p.OwnerID, &p.Title, &p.Description, &p.PropertyType, &p.District, &p.Ward, &p.AddressLine, &p.City, &p.Latitude, &p.Longitude, &p.Verification, &p.CreatedAt)
+	row := h.DB.QueryRow(context.Background(), `SELECT `+propertySelectFields+` FROM properties WHERE id=$1`, id)
+	p, err := scanProperty(row)
 	if err != nil {
 		httpx.Error(w, http.StatusNotFound, "property not found")
 		return

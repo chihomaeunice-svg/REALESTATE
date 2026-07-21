@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Home, Menu, X } from "lucide-react";
+import { Home, Menu, X, Heart } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../lib/auth-context";
+import { useWishlist } from "../lib/wishlist-context";
 
 export function Navbar() {
   const { user, logout } = useAuth();
+  const { ids } = useWishlist();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -34,6 +36,15 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-6 text-sm font-medium text-ink-600 md:flex">
           <Link to="/listings" className="hover:text-brand-700">Browse listings</Link>
+          <Link to="/wishlist" className="relative flex items-center gap-1.5 hover:text-brand-700">
+            <Heart className="h-4 w-4" />
+            Wishlist
+            {ids.size > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-semibold text-white">
+                {ids.size}
+              </span>
+            )}
+          </Link>
           {user ? (
             <>
               <Link to={dashboardPath} className="hover:text-brand-700">Dashboard</Link>
@@ -56,6 +67,7 @@ export function Navbar() {
         <div className="border-t border-ink-100 bg-white px-4 py-3 md:hidden">
           <div className="flex flex-col gap-3 text-sm font-medium text-ink-600">
             <Link to="/listings" onClick={() => setOpen(false)}>Browse listings</Link>
+            <Link to="/wishlist" onClick={() => setOpen(false)}>Wishlist {ids.size > 0 && `(${ids.size})`}</Link>
             {user ? (
               <>
                 <Link to={dashboardPath} onClick={() => setOpen(false)}>Dashboard</Link>

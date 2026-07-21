@@ -35,6 +35,7 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 	reportH := &handlers.ReportHandler{DB: db}
 	adminH := &handlers.AdminHandler{DB: db}
 	subH := &handlers.SubscriptionHandler{DB: db}
+	favH := &handlers.FavoriteHandler{DB: db}
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
@@ -72,6 +73,7 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 
 				// Layer 2: management suite
 				r.Get("/tenants", tenantH.ListForLandlord)
+				r.Get("/tenants/lookup", tenantH.LookupByPhone)
 				r.Post("/leases", leaseH.Create)
 				r.Get("/leases", leaseH.ListForLandlord)
 				r.Post("/payments/manual", payH.LogManual)
@@ -85,6 +87,7 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 			r.Group(func(r chi.Router) {
 				r.Use(appmw.RequireRole("tenant"))
 				r.Get("/tenant/me", tenantH.GetForTenantUser)
+				r.Post("/tenant/profile", tenantH.UpsertMyProfile)
 				r.Get("/tenant/leases", leaseH.ListForTenant)
 			})
 
@@ -94,6 +97,13 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 			r.Get("/leases/{id}/document", leaseH.Document)
 			r.Post("/leases/{id}/sign", leaseH.Sign)
 			r.Post("/payments/mpesa/stk-push", payH.StkPush)
+
+			// Wishlist/favorites: any authenticated role can save listings
+			r.Get("/favorites", favH.List)
+			r.Get("/favorites/ids", favH.IDs)
+			r.Post("/favorites", favH.Add)
+			r.Post("/favorites/sync", favH.Sync)
+			r.Delete("/favorites/{listingID}", favH.Remove)
 
 			// Admin: verification queue
 			r.Group(func(r chi.Router) {
