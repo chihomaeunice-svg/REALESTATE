@@ -18,15 +18,18 @@ type ListingHandler struct {
 }
 
 type listingRequest struct {
-	PropertyID  string   `json:"property_id"`
-	UnitID      *string  `json:"unit_id"`
-	Purpose     string   `json:"purpose"`
-	Title       string   `json:"title"`
-	Description *string  `json:"description"`
-	Price       float64  `json:"price"`
-	PricePeriod *string  `json:"price_period"`
-	ContactPhone string  `json:"contact_phone"`
-	Images      []string `json:"images"`
+	PropertyID         string   `json:"property_id"`
+	UnitID             *string  `json:"unit_id"`
+	Purpose            string   `json:"purpose"`
+	Title              string   `json:"title"`
+	Description        *string  `json:"description"`
+	Price              float64  `json:"price"`
+	PricePeriod        *string  `json:"price_period"`
+	ContactPhone       string   `json:"contact_phone"`
+	AcceptsMonthlyRent bool     `json:"accepts_monthly_rent"`
+	Bedrooms           int      `json:"bedrooms"`
+	Bathrooms          int      `json:"bathrooms"`
+	Images             []string `json:"images"`
 }
 
 func (h *ListingHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -51,11 +54,11 @@ func (h *ListingHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	var l models.Listing
 	err := h.DB.QueryRow(ctx, `
-		INSERT INTO listings (property_id, unit_id, purpose, title, description, price, price_period, contact_phone)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-		RETURNING id, property_id, unit_id, purpose, title, description, price, price_period, status, contact_phone, view_count, created_at
-	`, req.PropertyID, req.UnitID, purpose, req.Title, req.Description, req.Price, period, req.ContactPhone).Scan(
-		&l.ID, &l.PropertyID, &l.UnitID, &l.Purpose, &l.Title, &l.Description, &l.Price, &l.PricePeriod, &l.Status, &l.ContactPhone, &l.ViewCount, &l.CreatedAt,
+		INSERT INTO listings (property_id, unit_id, purpose, title, description, price, price_period, contact_phone, accepts_monthly_rent, bedrooms, bathrooms)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		RETURNING id, property_id, unit_id, purpose, title, description, price, price_period, status, contact_phone, accepts_monthly_rent, view_count, created_at
+	`, req.PropertyID, req.UnitID, purpose, req.Title, req.Description, req.Price, period, req.ContactPhone, req.AcceptsMonthlyRent, req.Bedrooms, req.Bathrooms).Scan(
+		&l.ID, &l.PropertyID, &l.UnitID, &l.Purpose, &l.Title, &l.Description, &l.Price, &l.PricePeriod, &l.Status, &l.ContactPhone, &l.AcceptsMonthlyRent, &l.ViewCount, &l.CreatedAt,
 	)
 	if err != nil {
 		httpx.Error(w, http.StatusInternalServerError, "could not create listing: "+err.Error())
@@ -72,9 +75,10 @@ func (h *ListingHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 const listingSelectFields = `
 	l.id, l.property_id, l.unit_id, l.purpose, l.title, l.description, l.price, l.price_period,
-	l.status, l.contact_phone, l.view_count, l.created_at,
+	l.status, l.contact_phone, l.accepts_monthly_rent, l.view_count, l.created_at,
 	p.district, p.ward, p.city, p.property_type, p.verification,
-	u.bedrooms, u.bathrooms, p.land_size_acres, p.title_deed_status
+	COALESCE(NULLIF(l.bedrooms,0), u.bedrooms), COALESCE(NULLIF(l.bathrooms,0), u.bathrooms),
+	p.land_size_acres, p.title_deed_status
 `
 
 func scanListing(row interface{ Scan(dest ...any) error }) (models.Listing, error) {
@@ -82,7 +86,7 @@ func scanListing(row interface{ Scan(dest ...any) error }) (models.Listing, erro
 	var bedrooms, bathrooms *int
 	err := row.Scan(
 		&l.ID, &l.PropertyID, &l.UnitID, &l.Purpose, &l.Title, &l.Description, &l.Price, &l.PricePeriod,
-		&l.Status, &l.ContactPhone, &l.ViewCount, &l.CreatedAt,
+		&l.Status, &l.ContactPhone, &l.AcceptsMonthlyRent, &l.ViewCount, &l.CreatedAt,
 		&l.District, &l.Ward, &l.City, &l.PropertyType, &l.Verification,
 		&bedrooms, &bathrooms, &l.LandSizeAcres, &l.TitleDeedStatus,
 	)
@@ -104,6 +108,8 @@ func (h *ListingHandler) Browse(w http.ResponseWriter, r *http.Request) {
 	purpose := q.Get("purpose")
 	minPrice, _ := strconv.ParseFloat(q.Get("min_price"), 64)
 	maxPrice, _ := strconv.ParseFloat(q.Get("max_price"), 64)
+	bedrooms, _ := strconv.Atoi(q.Get("bedrooms"))
+	acceptsMonthly := q.Get("accepts_monthly_rent")
 
 	query := `
 		SELECT ` + listingSelectFields + `
@@ -141,6 +147,14 @@ func (h *ListingHandler) Browse(w http.ResponseWriter, r *http.Request) {
 		query += ` AND l.price <= $` + itoa(argN)
 		args = append(args, maxPrice)
 		argN++
+	}
+	if bedrooms > 0 {
+		query += ` AND COALESCE(NULLIF(l.bedrooms,0), u.bedrooms, 0) >= $` + itoa(argN)
+		args = append(args, bedrooms)
+		argN++
+	}
+	if acceptsMonthly == "true" {
+		query += ` AND l.accepts_monthly_rent = true`
 	}
 	query += ` ORDER BY l.created_at DESC LIMIT 100`
 

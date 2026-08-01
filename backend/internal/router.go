@@ -29,6 +29,7 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 	authH := &handlers.AuthHandler{DB: db, JWTSecret: jwtSecret}
 	propH := &handlers.PropertyHandler{DB: db}
 	listH := &handlers.ListingHandler{DB: db}
+	uploadH := &handlers.UploadHandler{}
 	tenantH := &handlers.TenantHandler{DB: db}
 	leaseH := &handlers.LeaseHandler{DB: db}
 	payH := &handlers.PaymentHandler{DB: db}
@@ -39,6 +40,12 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	})
+
+	// Serve uploaded files from the local ./uploads directory.
+	fileServer := http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads")))
+	r.Get("/uploads/*", func(w http.ResponseWriter, r *http.Request) {
+		fileServer.ServeHTTP(w, r)
 	})
 
 	r.Route("/api", func(r chi.Router) {
@@ -69,6 +76,7 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 				r.Get("/properties/{id}/units", propH.ListUnits)
 				r.Get("/units", propH.ListAllUnitsForLandlord)
 				r.Post("/listings", listH.Create)
+				r.Post("/uploads", uploadH.Upload)
 				r.Get("/inquiries", listH.ListInquiriesForLandlord)
 
 				// Layer 2: management suite
