@@ -70,6 +70,7 @@ func main() {
 		beds, baths      int
 		size, rent       float64
 		listImage        string
+		acceptsMonthly   bool
 	}
 	type propertySeed struct {
 		ownerIdx                int
@@ -81,41 +82,41 @@ func main() {
 		{
 			ownerIdx: 0, title: "Mikocheni Green Apartments", district: "Kinondoni", ward: "Mikocheni", ptype: "apartment", addr: "Mikocheni B, off Mwai Kibaki Rd",
 			units: []unitSeed{
-				{"A1", 2, 2, 85, 550000, "https://picsum.photos/seed/mikocheni1/900/600"},
-				{"A2", 3, 2, 110, 750000, "https://picsum.photos/seed/mikocheni2/900/600"},
+				{"A1", 2, 2, 85, 550000, "https://picsum.photos/seed/mikocheni1/900/600", true},
+				{"A2", 3, 2, 110, 750000, "https://picsum.photos/seed/mikocheni2/900/600", false},
 			},
 		},
 		{
 			ownerIdx: 0, title: "Msasani Peninsula House", district: "Kinondoni", ward: "Msasani", ptype: "house", addr: "Msasani Peninsula",
 			units: []unitSeed{
-				{"Main House", 4, 3, 220, 1800000, "https://picsum.photos/seed/msasani1/900/600"},
+				{"Main House", 4, 3, 220, 1800000, "https://picsum.photos/seed/msasani1/900/600", false},
 			},
 		},
 		{
 			ownerIdx: 1, title: "Upanga Riverside Flats", district: "Ilala", ward: "Upanga", ptype: "apartment", addr: "Upanga West, near Muhimbili",
 			units: []unitSeed{
-				{"B1", 1, 1, 45, 320000, "https://picsum.photos/seed/upanga1/900/600"},
-				{"B2", 2, 1, 65, 450000, "https://picsum.photos/seed/upanga2/900/600"},
-				{"B3", 2, 1, 65, 450000, "https://picsum.photos/seed/upanga3/900/600"},
+				{"B1", 1, 1, 45, 320000, "https://picsum.photos/seed/upanga1/900/600", true},
+				{"B2", 2, 1, 65, 450000, "https://picsum.photos/seed/upanga2/900/600", true},
+				{"B3", 2, 1, 65, 450000, "https://picsum.photos/seed/upanga3/900/600", false},
 			},
 		},
 		{
 			ownerIdx: 1, title: "Kariakoo Commercial Shop", district: "Ilala", ward: "Kariakoo", ptype: "shop", addr: "Kariakoo Market Street",
 			units: []unitSeed{
-				{"Shop 12", 0, 1, 30, 400000, "https://picsum.photos/seed/kariakoo1/900/600"},
+				{"Shop 12", 0, 1, 30, 400000, "https://picsum.photos/seed/kariakoo1/900/600", false},
 			},
 		},
 		{
 			ownerIdx: 2, title: "Kigamboni Beachside Rooms", district: "Kigamboni", ward: "Kigamboni", ptype: "room", addr: "Kigamboni, near the ferry",
 			units: []unitSeed{
-				{"R1", 1, 1, 25, 180000, "https://picsum.photos/seed/kigamboni1/900/600"},
-				{"R2", 1, 1, 25, 180000, "https://picsum.photos/seed/kigamboni2/900/600"},
+				{"R1", 1, 1, 25, 180000, "https://picsum.photos/seed/kigamboni1/900/600", true},
+				{"R2", 1, 1, 25, 180000, "https://picsum.photos/seed/kigamboni2/900/600", true},
 			},
 		},
 		{
 			ownerIdx: 2, title: "Ubungo Business Office", district: "Ubungo", ward: "Ubungo", ptype: "office", addr: "Ubungo, near the interchange",
 			units: []unitSeed{
-				{"Suite 3", 0, 2, 90, 900000, "https://picsum.photos/seed/ubungo1/900/600"},
+				{"Suite 3", 0, 2, 90, 900000, "https://picsum.photos/seed/ubungo1/900/600", false},
 			},
 		},
 	}
@@ -142,9 +143,9 @@ func main() {
 
 			var listingID string
 			must(pool.QueryRow(ctx, `
-				INSERT INTO listings (property_id, unit_id, purpose, title, description, price, price_period, contact_phone)
-				VALUES ($1,$2,'rent',$3,$4,$5,'month',$6) RETURNING id
-			`, propID, unitID, ps.title+" - "+u.label, "Spacious "+itoaSeed(u.beds)+" bedroom "+ps.ptype+" in "+ps.ward+".", u.rent, landlords[ps.ownerIdx].phone).Scan(&listingID))
+				INSERT INTO listings (property_id, unit_id, purpose, title, description, price, price_period, contact_phone, accepts_monthly_rent, bedrooms, bathrooms)
+				VALUES ($1,$2,'rent',$3,$4,$5,'month',$6,$7,$8,$9) RETURNING id
+			`, propID, unitID, ps.title+" - "+u.label, "Spacious "+itoaSeed(u.beds)+" bedroom "+ps.ptype+" in "+ps.ward+".", u.rent, landlords[ps.ownerIdx].phone, u.acceptsMonthly, u.beds, u.baths).Scan(&listingID))
 
 			must2(pool.Exec(ctx, `INSERT INTO listing_images (listing_id, url, sort_order) VALUES ($1,$2,0)`, listingID, u.listImage))
 		}

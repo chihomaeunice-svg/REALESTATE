@@ -56,9 +56,10 @@ type Listing struct {
 	Price       float64   `json:"price"`
 	PricePeriod string    `json:"price_period"`
 	Status      string    `json:"status"`
-	ContactPhone string   `json:"contact_phone"`
-	ViewCount   int       `json:"view_count"`
-	CreatedAt   time.Time `json:"created_at"`
+	ContactPhone        string `json:"contact_phone"`
+	AcceptsMonthlyRent  bool   `json:"accepts_monthly_rent"`
+	ViewCount           int    `json:"view_count"`
+	CreatedAt           time.Time `json:"created_at"`
 
 	// Joined fields for API responses
 	District     string   `json:"district,omitempty"`
