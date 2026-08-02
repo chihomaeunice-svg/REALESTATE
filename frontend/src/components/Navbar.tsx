@@ -1,12 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Heart } from "lucide-react";
+import { Menu, X, Heart, Sun, Moon } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../lib/auth-context";
 import { useWishlist } from "../lib/wishlist-context";
+import { useTheme } from "../lib/theme-context";
+import { Logo } from "./Logo";
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const { ids } = useWishlist();
+  const { theme, toggle: toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -25,14 +28,12 @@ export function Navbar() {
       : "/";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ink-100/60 bg-white/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-surface-border/60 bg-surface/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-sm font-bold text-white shadow-sm">
-            NY
-          </span>
-          <span className="font-display text-lg font-semibold text-ink-900">
-            Nyumba Yangu
+          <Logo className="h-9 w-9 shrink-0" />
+          <span className="text-lg font-semibold text-ink-900">
+            Nyumba <span className="font-display italic text-brand-600">Yangu</span>
           </span>
         </Link>
 
@@ -82,15 +83,31 @@ export function Navbar() {
               </Link>
             </>
           )}
+          <button
+            onClick={toggleTheme}
+            aria-label="Toggle dark mode"
+            className="ml-2 flex h-9 w-9 items-center justify-center rounded-lg text-ink-500 transition hover:bg-ink-50 hover:text-ink-900"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
         </nav>
 
-        <button className="md:hidden" onClick={() => setOpen((o) => !o)} aria-label="Toggle menu">
-          {open ? <X className="h-6 w-6 text-ink-700" /> : <Menu className="h-6 w-6 text-ink-700" />}
-        </button>
+        <div className="flex items-center gap-1 md:hidden">
+          <button
+            onClick={toggleTheme}
+            aria-label="Toggle dark mode"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-500 transition hover:bg-ink-50"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+          <button onClick={() => setOpen((o) => !o)} aria-label="Toggle menu">
+            {open ? <X className="h-6 w-6 text-ink-700" /> : <Menu className="h-6 w-6 text-ink-700" />}
+          </button>
+        </div>
       </div>
 
       {open && (
-        <div className="border-t border-ink-100 bg-white px-4 pb-4 pt-3 md:hidden">
+        <div className="border-t border-surface-border bg-surface px-4 pb-4 pt-3 md:hidden">
           <div className="flex flex-col gap-1">
             <MobileLink to="/listings" onClick={() => setOpen(false)}>Browse</MobileLink>
             <MobileLink to="/wishlist" onClick={() => setOpen(false)}>

@@ -179,7 +179,7 @@ export function ListingDetail() {
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm text-ink-600 shadow-sm ring-1 ring-ink-100">
+    <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface px-3 py-2 text-sm text-ink-600 shadow-sm ring-1 ring-ink-100">
       {children}
     </span>
   );

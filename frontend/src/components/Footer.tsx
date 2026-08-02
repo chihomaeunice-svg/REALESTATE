@@ -1,17 +1,16 @@
 import { Link } from "react-router-dom";
+import { Logo } from "./Logo";
 
 export function Footer() {
   return (
-    <footer className="border-t border-ink-100 bg-white">
+    <footer className="border-t border-surface-border bg-surface">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-xs">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-xs font-bold text-white">
-                NY
-              </span>
-              <span className="font-display text-base font-semibold text-ink-900">
-                Nyumba Yangu
+              <Logo className="h-8 w-8 shrink-0" />
+              <span className="text-base font-semibold text-ink-900">
+                Nyumba <span className="font-display italic text-brand-600">Yangu</span>
               </span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-ink-500">
