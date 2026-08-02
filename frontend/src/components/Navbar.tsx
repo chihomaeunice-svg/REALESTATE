@@ -7,14 +7,14 @@ import { THEME } from "../lib/theme";
 
 const VARIANT = {
   meridian: {
-    header: "sticky top-0 z-40 border-b border-ink-100/60 bg-white/80 backdrop-blur-xl",
+    header: "sticky top-0 z-40 border-b border-ink-100/60 bg-[var(--color-surface)]/80 backdrop-blur-xl",
     bar: "mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6",
     logoBadge: "flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-sm font-bold text-white shadow-sm",
     logoText: "font-display text-lg font-semibold text-ink-900",
     link: "rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900",
   },
   terracotta: {
-    header: "border-b border-ink-100 bg-white",
+    header: "border-b border-ink-100 bg-[var(--color-surface)]",
     bar: "mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-3 sm:px-6",
     logoBadge: "flex h-10 w-10 items-center justify-center rounded-[var(--radius-btn)] bg-brand-600 text-sm font-bold text-white",
     logoText: "font-display text-xl italic font-semibold text-ink-900",
@@ -22,7 +22,7 @@ const VARIANT = {
   },
   coastal: {
     header: "sticky top-0 z-40 bg-transparent px-3 pt-3 sm:px-6",
-    bar: "mx-auto flex h-14 max-w-5xl items-center justify-between rounded-full bg-white/90 px-5 shadow-[var(--shadow-card)] ring-1 ring-brand-100 backdrop-blur-xl",
+    bar: "mx-auto flex h-14 max-w-5xl items-center justify-between rounded-full bg-[var(--color-surface)]/90 px-5 shadow-[var(--shadow-card)] ring-1 ring-brand-100 backdrop-blur-xl",
     logoBadge: "flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white",
     logoText: "font-display text-base font-semibold text-ink-900",
     link: "rounded-full px-3.5 py-1.5 text-sm font-medium text-ink-600 transition hover:bg-brand-50 hover:text-brand-700",
@@ -35,7 +35,7 @@ const VARIANT = {
     link: "border-l border-brand-800/10 px-3 py-2 text-sm font-medium text-brand-800/80 transition first:border-l-0 hover:text-brand-900",
   },
   monochrome: {
-    header: "border-b border-ink-900 bg-white",
+    header: "border-b border-ink-900 bg-[var(--color-surface)]",
     bar: "mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6",
     logoBadge: "hidden",
     logoText: "font-display text-base font-bold uppercase tracking-[0.2em] text-ink-950",
@@ -117,7 +117,7 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="border-t border-ink-100 bg-white px-4 pb-4 pt-3 md:hidden">
+        <div className="border-t border-ink-100 bg-[var(--color-surface)] px-4 pb-4 pt-3 md:hidden">
           <div className="flex flex-col gap-1">
             <MobileLink to="/listings" onClick={() => setOpen(false)}>Browse</MobileLink>
             <MobileLink to="/wishlist" onClick={() => setOpen(false)}>

@@ -190,7 +190,7 @@ function PayModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/40 p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-sm rounded-2xl bg-[var(--color-surface)] p-6 shadow-xl">
         {stage === "done" ? (
           <div className="text-center">
             <p className="mb-2 text-4xl">✅</p>

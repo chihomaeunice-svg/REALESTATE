@@ -91,7 +91,7 @@ export function Home() {
 
             <form
               onSubmit={handleSearch}
-              className="mt-10 flex flex-col gap-3 rounded-[var(--radius-card)] bg-white/95 p-3 shadow-[var(--shadow-card)] backdrop-blur-sm sm:flex-row sm:items-center"
+              className="mt-10 flex flex-col gap-3 rounded-[var(--radius-card)] bg-[var(--color-surface)]/95 p-3 shadow-[var(--shadow-card)] backdrop-blur-sm sm:flex-row sm:items-center"
             >
               {searchFields}
             </form>
@@ -120,7 +120,7 @@ export function Home() {
                 <MapPin className="h-4 w-4" />
                 Dar es Salaam
               </div>
-              <h1 className="mt-4 font-display text-4xl italic font-semibold leading-[1.15] text-ink-950 sm:text-5xl">
+              <h1 className="mt-4 font-display text-4xl font-bold uppercase leading-[1.1] tracking-tight text-ink-950 sm:text-5xl">
                 Find your next home, verified and ready.
               </h1>
               <p className="mt-5 max-w-md text-base leading-relaxed text-ink-600">
@@ -129,7 +129,7 @@ export function Home() {
               </p>
               <form
                 onSubmit={handleSearch}
-                className="mt-8 flex flex-col gap-3 rounded-[var(--radius-card)] bg-white p-3 shadow-[var(--shadow-card)] ring-1 ring-ink-100 sm:flex-row sm:items-center"
+                className="mt-8 flex flex-col gap-3 rounded-[var(--radius-card)] bg-[var(--color-surface)] p-3 shadow-[var(--shadow-card)] ring-1 ring-ink-100 sm:flex-row sm:items-center"
               >
                 {searchFields}
               </form>
@@ -154,7 +154,7 @@ export function Home() {
       )}
 
       {HERO_LAYOUT === "centered" && (
-        <section className="border-b border-ink-100 bg-white">
+        <section className="border-b border-ink-100 bg-[var(--color-surface)]">
           <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:py-28">
             <div className="flex items-center justify-center gap-2 text-sm font-medium text-brand-600">
               <MapPin className="h-4 w-4" />
@@ -223,7 +223,7 @@ export function Home() {
       </section>
 
       {/* Features */}
-      <section className="border-t border-ink-100 bg-white py-16 lg:py-20">
+      <section className="border-t border-ink-100 bg-[var(--color-surface)] py-16 lg:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">For landlords</p>

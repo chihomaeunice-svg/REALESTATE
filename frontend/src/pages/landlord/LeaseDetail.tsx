@@ -118,7 +118,7 @@ function LogPaymentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/40 p-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-2xl bg-[var(--color-surface)] p-6 shadow-xl">
         <h3 className="flex items-center gap-2 text-lg font-semibold text-ink-900">
           <Banknote className="h-5 w-5 text-brand-600" /> Log cash/bank payment
         </h3>

@@ -134,7 +134,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
           <WishlistButton listingId={listing.id} />
         </div>
         <div className="absolute bottom-3 left-3">
-          <span className="rounded-lg bg-white/90 px-2.5 py-1 text-xs font-semibold text-ink-800 backdrop-blur-sm">
+          <span className="rounded-lg bg-[var(--color-surface)]/90 px-2.5 py-1 text-xs font-semibold text-ink-800 backdrop-blur-sm">
             {listing.purpose === "rent" ? "For rent" : "For sale"}
           </span>
         </div>

@@ -166,7 +166,7 @@ export function Register() {
                   onChange={(e) => handleCodeChange(i, e.target.value)}
                   onKeyDown={(e) => handleCodeKeyDown(i, e)}
                   autoFocus={i === 0}
-                  className="h-13 w-11 rounded-xl border border-ink-200 bg-white text-center text-xl font-semibold text-ink-900 transition-all focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                  className="h-13 w-11 rounded-xl border border-ink-200 bg-[var(--color-surface)] text-center text-xl font-semibold text-ink-900 transition-all focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
                 />
               ))}
             </div>
@@ -213,7 +213,7 @@ export function Register() {
                 className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3.5 text-left text-sm font-medium transition ${
                   role === "landlord"
                     ? "border-brand-500 bg-brand-50 text-brand-700"
-                    : "border-ink-200 bg-white text-ink-600 hover:border-ink-300"
+                    : "border-ink-200 bg-[var(--color-surface)] text-ink-600 hover:border-ink-300"
                 }`}
               >
                 <Building2 className="h-5 w-5 shrink-0" />
@@ -228,7 +228,7 @@ export function Register() {
                 className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3.5 text-left text-sm font-medium transition ${
                   role === "tenant"
                     ? "border-brand-500 bg-brand-50 text-brand-700"
-                    : "border-ink-200 bg-white text-ink-600 hover:border-ink-300"
+                    : "border-ink-200 bg-[var(--color-surface)] text-ink-600 hover:border-ink-300"
                 }`}
               >
                 <User className="h-5 w-5 shrink-0" />
@@ -357,7 +357,7 @@ export function Register() {
       {showTerms && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm" onClick={() => setShowTerms(false)}>
           <div
-            className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl sm:p-8"
+            className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-[var(--color-surface)] p-6 shadow-xl sm:p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-semibold text-ink-900">Terms and Conditions</h2>

@@ -42,6 +42,7 @@
   --radius-card: 1rem;
   --radius-btn: 0.75rem;
   --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --color-surface: #ffffff;
 }
 
 /*
@@ -50,176 +51,185 @@
  * at build time (see main.tsx), which sets data-theme on <html> and lets
  * one of the blocks below override the brand/sun/ink variables.
  */
+/* Neo Bazaar — loud neo-brutalist market energy: coral/hot-pink, cream paper, hard offset shadows */
 :root[data-theme="terracotta"] {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
-  --radius-card: 0.5rem;
-  --radius-btn: 0.5rem;
-  --shadow-card: 0 8px 24px -8px rgb(178 68 31 / 0.35);
-
-  --color-brand-50: #fdf3ef;
-  --color-brand-100: #fbe2d6;
-  --color-brand-200: #f5c3ab;
-  --color-brand-300: #eb9c78;
-  --color-brand-400: #e07548;
-  --color-brand-500: #d15a2c;
-  --color-brand-600: #b1441f;
-  --color-brand-700: #8f371c;
-  --color-brand-800: #742f1b;
-  --color-brand-900: #5f2919;
-  --color-brand-950: #33130b;
-
-  --color-sun-50: #fffaeb;
-  --color-sun-100: #fff0c2;
-  --color-sun-200: #ffdd85;
-  --color-sun-300: #ffc247;
-  --color-sun-400: #ffa61b;
-  --color-sun-500: #f78606;
-  --color-sun-600: #d66502;
-  --color-sun-700: #b04606;
-  --color-sun-800: #8f380c;
-  --color-sun-900: #762f0e;
-
-  --color-ink-50: #faf8f6;
-  --color-ink-100: #f0ebe6;
-  --color-ink-200: #e2d9d1;
-  --color-ink-300: #c7b8ac;
-  --color-ink-400: #a4907f;
-  --color-ink-500: #8a7562;
-  --color-ink-600: #6b5847;
-  --color-ink-700: #4f4033;
-  --color-ink-800: #382d24;
-  --color-ink-900: #241d17;
-  --color-ink-950: #120e0b;
-}
-
-:root[data-theme="coastal"] {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --radius-card: 1.5rem;
-  --radius-btn: 9999px;
-  --shadow-card: 0 1px 3px 0 rgb(36 101 154 / 0.1);
-
-  --color-brand-50: #eef6fb;
-  --color-brand-100: #d6ecf6;
-  --color-brand-200: #aed8ed;
-  --color-brand-300: #7cbfe0;
-  --color-brand-400: #4a9ecf;
-  --color-brand-500: #2f80b8;
-  --color-brand-600: #24659a;
-  --color-brand-700: #1f527c;
-  --color-brand-800: #1c4265;
-  --color-brand-900: #1a3752;
-  --color-brand-950: #0f2130;
-
-  --color-sun-50: #fff5f0;
-  --color-sun-100: #ffe4d6;
-  --color-sun-200: #ffc4a8;
-  --color-sun-300: #ff9d73;
-  --color-sun-400: #fc7a48;
-  --color-sun-500: #f25a26;
-  --color-sun-600: #d4401a;
-  --color-sun-700: #ad3018;
-  --color-sun-800: #8c2a1a;
-  --color-sun-900: #74271a;
-
-  --color-ink-50: #f6f8fa;
-  --color-ink-100: #ebeef2;
-  --color-ink-200: #d9dfe6;
-  --color-ink-300: #b5c0cc;
-  --color-ink-400: #8998a8;
-  --color-ink-500: #6c7c8d;
-  --color-ink-600: #536171;
-  --color-ink-700: #3e4854;
-  --color-ink-800: #2b323b;
-  --color-ink-900: #1b1f25;
-  --color-ink-950: #0d0f12;
-}
-
-:root[data-theme="forest"] {
-  --font-sans: "Nunito", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
-  --radius-card: 0.375rem;
-  --radius-btn: 0.375rem;
-  --shadow-card: 0 0 0 1px rgb(57 85 37 / 0.18);
-
-  --color-brand-50: #f2f7ee;
-  --color-brand-100: #e2edd7;
-  --color-brand-200: #c5dcae;
-  --color-brand-300: #a0c47e;
-  --color-brand-400: #7ba854;
-  --color-brand-500: #5c8a38;
-  --color-brand-600: #476c2b;
-  --color-brand-700: #395525;
-  --color-brand-800: #2f4521;
-  --color-brand-900: #28391f;
-  --color-brand-950: #131f0f;
-
-  --color-sun-50: #fdf8ec;
-  --color-sun-100: #f9ecc6;
-  --color-sun-200: #f2d788;
-  --color-sun-300: #eabc4c;
-  --color-sun-400: #dfa025;
-  --color-sun-500: #c6811a;
-  --color-sun-600: #a26314;
-  --color-sun-700: #814a15;
-  --color-sun-800: #693c17;
-  --color-sun-900: #573217;
-
-  --color-ink-50: #f8f7f3;
-  --color-ink-100: #ece9e0;
-  --color-ink-200: #dad4c4;
-  --color-ink-300: #bcb29a;
-  --color-ink-400: #99896c;
-  --color-ink-500: #7d6f56;
-  --color-ink-600: #635944;
-  --color-ink-700: #4a4234;
-  --color-ink-800: #332e25;
-  --color-ink-900: #211d17;
-  --color-ink-950: #100e0b;
-}
-
-:root[data-theme="monochrome"] {
-  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --radius-card: 0px;
   --radius-btn: 0px;
-  --shadow-card: 0 0 0 1px rgb(0 0 0 / 0.15);
+  --shadow-card: 6px 6px 0 0 var(--color-ink-950);
+  --color-surface: #fffdf9;
 
-  --color-brand-50: #f7f7f7;
-  --color-brand-100: #ececec;
-  --color-brand-200: #d6d6d6;
-  --color-brand-300: #b3b3b3;
-  --color-brand-400: #8a8a8a;
-  --color-brand-500: #6b6b6b;
-  --color-brand-600: #525252;
-  --color-brand-700: #3d3d3d;
-  --color-brand-800: #2a2a2a;
-  --color-brand-900: #1a1a1a;
-  --color-brand-950: #0a0a0a;
+  --color-brand-50: #fff1ec;
+  --color-brand-100: #ffdccb;
+  --color-brand-200: #ffb494;
+  --color-brand-300: #ff8557;
+  --color-brand-400: #ff5a2e;
+  --color-brand-500: #f5410f;
+  --color-brand-600: #cc330a;
+  --color-brand-700: #a3280a;
+  --color-brand-800: #82230d;
+  --color-brand-900: #6a1f0e;
+  --color-brand-950: #391006;
 
-  --color-sun-50: #f8f8f9;
-  --color-sun-100: #eef0f1;
-  --color-sun-200: #dadee1;
-  --color-sun-300: #b9c0c5;
-  --color-sun-400: #939da5;
-  --color-sun-500: #76818a;
-  --color-sun-600: #5c666e;
-  --color-sun-700: #454d54;
-  --color-sun-800: #30363b;
-  --color-sun-900: #1e2226;
+  --color-sun-50: #fff0f7;
+  --color-sun-100: #ffd6ea;
+  --color-sun-200: #ffa8d3;
+  --color-sun-300: #ff70b3;
+  --color-sun-400: #f83d90;
+  --color-sun-500: #e0186c;
+  --color-sun-600: #b80f57;
+  --color-sun-700: #920f48;
+  --color-sun-800: #78123e;
+  --color-sun-900: #661238;
 
-  --color-ink-50: #fafafa;
-  --color-ink-100: #f0f0f0;
-  --color-ink-200: #e0e0e0;
-  --color-ink-300: #bdbdbd;
-  --color-ink-400: #8f8f8f;
-  --color-ink-500: #707070;
-  --color-ink-600: #545454;
-  --color-ink-700: #3d3d3d;
-  --color-ink-800: #262626;
-  --color-ink-900: #171717;
-  --color-ink-950: #0a0a0a;
+  --color-ink-50: #fff8f0;
+  --color-ink-100: #ffe9d6;
+  --color-ink-200: #f5d3b0;
+  --color-ink-300: #e0b183;
+  --color-ink-400: #b98a5c;
+  --color-ink-500: #8f6740;
+  --color-ink-600: #6b4c2e;
+  --color-ink-700: #493420;
+  --color-ink-800: #2c1f14;
+  --color-ink-900: #16100a;
+  --color-ink-950: #0a0705;
+}
+
+/* Midnight — full dark mode: near-black surfaces, electric cyan + violet glow */
+:root[data-theme="coastal"] {
+  color-scheme: dark;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 1.25rem;
+  --radius-btn: 0.75rem;
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.08), 0 8px 30px -8px rgb(0 163 232 / 0.45);
+  --color-surface: #12141c;
+
+  --color-brand-50: #eafdff;
+  --color-brand-100: #c9f7ff;
+  --color-brand-200: #93edff;
+  --color-brand-300: #55dcff;
+  --color-brand-400: #1cc3ff;
+  --color-brand-500: #00a3e8;
+  --color-brand-600: #0082c2;
+  --color-brand-700: #06679c;
+  --color-brand-800: #0d537d;
+  --color-brand-900: #114467;
+  --color-brand-950: #0a2b45;
+
+  --color-sun-50: #f6f0ff;
+  --color-sun-100: #e6d6ff;
+  --color-sun-200: #cba9ff;
+  --color-sun-300: #ac78ff;
+  --color-sun-400: #8f4dff;
+  --color-sun-500: #7726f5;
+  --color-sun-600: #6417d1;
+  --color-sun-700: #5313a8;
+  --color-sun-800: #431488;
+  --color-sun-900: #38166e;
+
+  --color-ink-50: #0b0d13;
+  --color-ink-100: #12141c;
+  --color-ink-200: #1c1f2b;
+  --color-ink-300: #2c303f;
+  --color-ink-400: #454a5e;
+  --color-ink-500: #6b7086;
+  --color-ink-600: #9296a8;
+  --color-ink-700: #c3c6d1;
+  --color-ink-800: #dcdee5;
+  --color-ink-900: #f4f5f8;
+  --color-ink-950: #ffffff;
+}
+
+/* Terra — quiet luxury: burgundy + gold on warm paper, crisp minimal edges */
+:root[data-theme="forest"] {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --radius-card: 0.25rem;
+  --radius-btn: 0.125rem;
+  --shadow-card: 0 12px 32px -12px rgb(74 25 47 / 0.28);
+  --color-surface: #fffaf3;
+
+  --color-brand-50: #fbf1f4;
+  --color-brand-100: #f4dbe3;
+  --color-brand-200: #e8b6c8;
+  --color-brand-300: #d787a3;
+  --color-brand-400: #c15980;
+  --color-brand-500: #a13760;
+  --color-brand-600: #82284c;
+  --color-brand-700: #6b1f3f;
+  --color-brand-800: #591b36;
+  --color-brand-900: #4a192f;
+  --color-brand-950: #290c19;
+
+  --color-sun-50: #fdf9ec;
+  --color-sun-100: #f9edc6;
+  --color-sun-200: #f1d787;
+  --color-sun-300: #e6ba49;
+  --color-sun-400: #d89f22;
+  --color-sun-500: #b98016;
+  --color-sun-600: #946213;
+  --color-sun-700: #764c14;
+  --color-sun-800: #613e16;
+  --color-sun-900: #513416;
+
+  --color-ink-50: #faf6f0;
+  --color-ink-100: #f1e8db;
+  --color-ink-200: #e0d0b8;
+  --color-ink-300: #c7ae8b;
+  --color-ink-400: #a8895f;
+  --color-ink-500: #8a6d47;
+  --color-ink-600: #6c5537;
+  --color-ink-700: #52402a;
+  --color-ink-800: #392c1e;
+  --color-ink-900: #241c13;
+  --color-ink-950: #120e09;
+}
+
+/* Blueprint — technical drafting aesthetic: cobalt ink lines + safety-orange marks on paper white */
+:root[data-theme="monochrome"] {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius-card: 0px;
+  --radius-btn: 0px;
+  --shadow-card: 0 0 0 1px var(--color-brand-300);
+  --color-surface: #ffffff;
+
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #d6e4ff;
+  --color-brand-200: #adc8ff;
+  --color-brand-300: #7ea3ff;
+  --color-brand-400: #4d7dff;
+  --color-brand-500: #2457eb;
+  --color-brand-600: #1a41c2;
+  --color-brand-700: #17359c;
+  --color-brand-800: #172c7d;
+  --color-brand-900: #172767;
+  --color-brand-950: #0e1740;
+
+  --color-sun-50: #fff4ec;
+  --color-sun-100: #ffe1c7;
+  --color-sun-200: #ffbd88;
+  --color-sun-300: #ff934a;
+  --color-sun-400: #ff6c1a;
+  --color-sun-500: #f24f04;
+  --color-sun-600: #c93c02;
+  --color-sun-700: #a02f07;
+  --color-sun-800: #82290d;
+  --color-sun-900: #6c250f;
+
+  --color-ink-50: #f7f9fc;
+  --color-ink-100: #eaeef5;
+  --color-ink-200: #d3dbe8;
+  --color-ink-300: #a9b7cf;
+  --color-ink-400: #7c8caa;
+  --color-ink-500: #5c6c8a;
+  --color-ink-600: #46536c;
+  --color-ink-700: #333d52;
+  --color-ink-800: #212838;
+  --color-ink-900: #141926;
+  --color-ink-950: #0a0d14;
 }
 
 @layer base {
@@ -247,19 +257,19 @@
     @apply inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-200;
   }
   .card {
-    @apply rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] ring-1 ring-ink-100/80;
+    @apply rounded-[var(--radius-card)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] ring-1 ring-ink-100/80;
   }
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-[var(--radius-btn)] bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-brand-700 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-[var(--radius-btn)] bg-white px-5 py-2.5 text-sm font-semibold text-ink-700 shadow-sm ring-1 ring-inset ring-ink-200 transition-all duration-200 hover:bg-ink-50 hover:ring-ink-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-[var(--radius-btn)] bg-[var(--color-surface)] px-5 py-2.5 text-sm font-semibold text-ink-700 shadow-sm ring-1 ring-inset ring-ink-200 transition-all duration-200 hover:bg-ink-50 hover:ring-ink-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-accent {
     @apply inline-flex items-center justify-center gap-2 rounded-[var(--radius-btn)] bg-sun-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-sun-600 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
   .input {
-    @apply w-full rounded-[var(--radius-btn)] border border-ink-200 bg-white px-3.5 py-2.5 text-sm text-ink-800 placeholder:text-ink-400 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100;
+    @apply w-full rounded-[var(--radius-btn)] border border-ink-200 bg-[var(--color-surface)] px-3.5 py-2.5 text-sm text-ink-800 placeholder:text-ink-400 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100;
   }
   .label {
     @apply mb-1.5 block text-sm font-medium text-ink-600;

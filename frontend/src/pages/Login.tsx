@@ -158,7 +158,7 @@ export function Login() {
                   onChange={(e) => handleCodeChange(i, e.target.value)}
                   onKeyDown={(e) => handleCodeKeyDown(i, e)}
                   autoFocus={i === 0}
-                  className="h-13 w-11 rounded-xl border border-ink-200 bg-white text-center text-xl font-semibold text-ink-900 transition-all focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                  className="h-13 w-11 rounded-xl border border-ink-200 bg-[var(--color-surface)] text-center text-xl font-semibold text-ink-900 transition-all focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
                 />
               ))}
             </div>
