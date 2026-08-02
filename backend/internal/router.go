@@ -8,12 +8,13 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"realestate-backend/internal/email"
 	"realestate-backend/internal/handlers"
 	"realestate-backend/internal/httpx"
 	appmw "realestate-backend/internal/middleware"
 )
 
-func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
+func NewRouter(db *pgxpool.Pool, jwtSecret, resendAPIKey string) http.Handler {
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
@@ -26,7 +27,12 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 		MaxAge:           300,
 	}))
 
-	authH := &handlers.AuthHandler{DB: db, JWTSecret: jwtSecret}
+	var emailClient *email.Client
+	if resendAPIKey != "" {
+		emailClient = email.NewClient(resendAPIKey)
+	}
+
+	authH := &handlers.AuthHandler{DB: db, JWTSecret: jwtSecret, Email: emailClient}
 	propH := &handlers.PropertyHandler{DB: db}
 	listH := &handlers.ListingHandler{DB: db}
 	uploadH := &handlers.UploadHandler{}
@@ -52,6 +58,8 @@ func NewRouter(db *pgxpool.Pool, jwtSecret string) http.Handler {
 		// --- Public: auth ---
 		r.Post("/auth/register", authH.Register)
 		r.Post("/auth/login", authH.Login)
+		r.Post("/auth/otp/send", authH.SendOTP)
+		r.Post("/auth/otp/verify", authH.VerifyOTP)
 
 		// --- Public: Layer 1 marketplace ---
 		r.Get("/listings", listH.Browse)

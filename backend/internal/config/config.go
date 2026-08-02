@@ -3,9 +3,10 @@ package config
 import "os"
 
 type Config struct {
-	Port        string
-	DatabaseURL string
-	JWTSecret   string
+	Port          string
+	DatabaseURL   string
+	JWTSecret     string
+	ResendAPIKey  string
 }
 
 func getenv(key, fallback string) string {
@@ -17,8 +18,9 @@ func getenv(key, fallback string) string {
 
 func Load() Config {
 	return Config{
-		Port:        getenv("PORT", "8080"),
-		DatabaseURL: getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/realestate?sslmode=disable"),
-		JWTSecret:   getenv("JWT_SECRET", "dev-secret-change-in-production"),
+		Port:         getenv("PORT", "8080"),
+		DatabaseURL:  getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/realestate?sslmode=disable"),
+		JWTSecret:    getenv("JWT_SECRET", "dev-secret-change-in-production"),
+		ResendAPIKey: getenv("RESEND_API_KEY", ""),
 	}
 }
