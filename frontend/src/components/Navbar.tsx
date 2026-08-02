@@ -3,6 +3,45 @@ import { Menu, X, Heart } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../lib/auth-context";
 import { useWishlist } from "../lib/wishlist-context";
+import { THEME } from "../lib/theme";
+
+const VARIANT = {
+  meridian: {
+    header: "sticky top-0 z-40 border-b border-ink-100/60 bg-white/80 backdrop-blur-xl",
+    bar: "mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6",
+    logoBadge: "flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-sm font-bold text-white shadow-sm",
+    logoText: "font-display text-lg font-semibold text-ink-900",
+    link: "rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900",
+  },
+  terracotta: {
+    header: "border-b border-ink-100 bg-white",
+    bar: "mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-3 sm:px-6",
+    logoBadge: "flex h-10 w-10 items-center justify-center rounded-[var(--radius-btn)] bg-brand-600 text-sm font-bold text-white",
+    logoText: "font-display text-xl italic font-semibold text-ink-900",
+    link: "px-3 py-1.5 text-sm font-medium text-ink-600 underline decoration-transparent decoration-2 underline-offset-4 transition hover:text-brand-700 hover:decoration-brand-500",
+  },
+  coastal: {
+    header: "sticky top-0 z-40 bg-transparent px-3 pt-3 sm:px-6",
+    bar: "mx-auto flex h-14 max-w-5xl items-center justify-between rounded-full bg-white/90 px-5 shadow-[var(--shadow-card)] ring-1 ring-brand-100 backdrop-blur-xl",
+    logoBadge: "flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white",
+    logoText: "font-display text-base font-semibold text-ink-900",
+    link: "rounded-full px-3.5 py-1.5 text-sm font-medium text-ink-600 transition hover:bg-brand-50 hover:text-brand-700",
+  },
+  forest: {
+    header: "border-b-2 border-brand-800/15 bg-brand-50/60",
+    bar: "mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6",
+    logoBadge: "flex h-9 w-9 items-center justify-center rounded-[var(--radius-btn)] bg-brand-700 text-sm font-bold text-white",
+    logoText: "font-display text-lg font-semibold text-brand-900",
+    link: "border-l border-brand-800/10 px-3 py-2 text-sm font-medium text-brand-800/80 transition first:border-l-0 hover:text-brand-900",
+  },
+  monochrome: {
+    header: "border-b border-ink-900 bg-white",
+    bar: "mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6",
+    logoBadge: "hidden",
+    logoText: "font-display text-base font-bold uppercase tracking-[0.2em] text-ink-950",
+    link: "px-3 py-2 text-xs font-semibold uppercase tracking-wide text-ink-700 transition hover:text-ink-950",
+  },
+}[THEME];
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -24,66 +63,54 @@ export function Navbar() {
       ? "/admin"
       : "/";
 
+  const logo = (
+    <Link to="/" className="flex items-center gap-2.5">
+      {VARIANT.logoBadge !== "hidden" && <span className={VARIANT.logoBadge}>NY</span>}
+      <span className={VARIANT.logoText}>Nyumba Yangu</span>
+    </Link>
+  );
+
+  const links = (
+    <>
+      <Link to="/listings" className={VARIANT.link}>
+        Browse
+      </Link>
+      <Link to="/wishlist" className={`relative flex items-center gap-1.5 ${VARIANT.link}`}>
+        <Heart className="h-4 w-4" />
+        Saved
+        {ids.size > 0 && (
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
+            {ids.size}
+          </span>
+        )}
+      </Link>
+      {user ? (
+        <>
+          <Link to={dashboardPath} className={VARIANT.link}>
+            Dashboard
+          </Link>
+          <button onClick={handleLogout} className="ml-2 btn-secondary !px-3.5 !py-1.5 !text-xs">
+            Log out
+          </button>
+        </>
+      ) : (
+        <>
+          <Link to="/login" className={VARIANT.link}>
+            Sign in
+          </Link>
+          <Link to="/register" className="ml-1 btn-primary !px-4 !py-2 !text-xs">
+            Get started
+          </Link>
+        </>
+      )}
+    </>
+  );
+
   return (
-    <header className="sticky top-0 z-40 border-b border-ink-100/60 bg-white/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-sm font-bold text-white shadow-sm">
-            NY
-          </span>
-          <span className="font-display text-lg font-semibold text-ink-900">
-            Nyumba Yangu
-          </span>
-        </Link>
-
-        <nav className="hidden items-center gap-1 md:flex">
-          <Link
-            to="/listings"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900"
-          >
-            Browse
-          </Link>
-          <Link
-            to="/wishlist"
-            className="relative flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900"
-          >
-            <Heart className="h-4 w-4" />
-            Saved
-            {ids.size > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
-                {ids.size}
-              </span>
-            )}
-          </Link>
-          {user ? (
-            <>
-              <Link
-                to={dashboardPath}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900"
-              >
-                Dashboard
-              </Link>
-              <div className="ml-2 h-6 w-px bg-ink-200" />
-              <button onClick={handleLogout} className="ml-2 btn-secondary !px-3.5 !py-1.5 !text-xs">
-                Log out
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="ml-2 h-6 w-px bg-ink-200" />
-              <Link
-                to="/login"
-                className="ml-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900"
-              >
-                Sign in
-              </Link>
-              <Link to="/register" className="ml-1 btn-primary !px-4 !py-2 !text-xs">
-                Get started
-              </Link>
-            </>
-          )}
-        </nav>
-
+    <header className={VARIANT.header}>
+      <div className={VARIANT.bar}>
+        {logo}
+        <nav className="hidden items-center gap-1 md:flex">{links}</nav>
         <button className="md:hidden" onClick={() => setOpen((o) => !o)} aria-label="Toggle menu">
           {open ? <X className="h-6 w-6 text-ink-700" /> : <Menu className="h-6 w-6 text-ink-700" />}
         </button>

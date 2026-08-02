@@ -7,7 +7,7 @@ export function Footer() {
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-xs">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-xs font-bold text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-btn)] bg-brand-600 text-xs font-bold text-white">
                 NY
               </span>
               <span className="font-display text-base font-semibold text-ink-900">

@@ -4,6 +4,7 @@ import { SlidersHorizontal, X } from "lucide-react";
 import { api, type Listing } from "../lib/api";
 import { ListingCard } from "../components/ListingCard";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
+import { LISTING_GRID_CLASS } from "../lib/theme";
 
 export function Listings() {
   const [params, setParams] = useSearchParams();
@@ -83,7 +84,7 @@ export function Listings() {
 
       <div className="mt-8">
         {loading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={LISTING_GRID_CLASS}>
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="card animate-pulse overflow-hidden">
                 <div className="aspect-[4/3] bg-ink-100" />
@@ -101,7 +102,7 @@ export function Listings() {
             <p className="mt-1 text-sm text-ink-400">Try broadening your search or clearing filters.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={LISTING_GRID_CLASS}>
             {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
           </div>
         )}
