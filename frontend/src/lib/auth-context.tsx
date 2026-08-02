@@ -6,12 +6,15 @@ interface AuthContextValue {
   loading: boolean;
   login: (phone: string, password: string) => Promise<User>;
   register: (payload: RegisterPayload) => Promise<User>;
+  sendOTP: (email: string) => Promise<void>;
+  verifyOTP: (email: string, code: string) => Promise<User>;
   logout: () => void;
   refresh: () => Promise<void>;
 }
 
-interface RegisterPayload {
+export interface RegisterPayload {
   phone: string;
+  email?: string;
   password: string;
   full_name: string;
   role: "landlord" | "tenant" | "agent";
@@ -61,13 +64,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.user;
   }
 
+  async function sendOTP(email: string) {
+    await api.post("/auth/otp/send", { email });
+  }
+
+  async function verifyOTP(email: string, code: string) {
+    const res = await api.post<{ token: string; user: User }>("/auth/otp/verify", { email, code });
+    setToken(res.token);
+    setUser(res.user);
+    return res.user;
+  }
+
   function logout() {
     clearToken();
     setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refresh }}>
+    <AuthContext.Provider value={{ user, loading, login, register, sendOTP, verifyOTP, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   );

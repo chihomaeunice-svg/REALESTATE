@@ -24,7 +24,7 @@ func main() {
 		log.Fatalf("failed to run migrations: %v", err)
 	}
 
-	router := internal.NewRouter(pool, cfg.JWTSecret)
+	router := internal.NewRouter(pool, cfg.JWTSecret, cfg.ResendAPIKey)
 
 	log.Printf("Nyumba Yangu API listening on :%s", cfg.Port)
 	if err := http.ListenAndServe(":"+cfg.Port, router); err != nil {

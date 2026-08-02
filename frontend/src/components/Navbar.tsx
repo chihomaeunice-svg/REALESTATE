@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Home, Menu, X, Heart } from "lucide-react";
+import { Menu, X, Heart } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../lib/auth-context";
 import { useWishlist } from "../lib/wishlist-context";
@@ -25,63 +25,108 @@ export function Navbar() {
       : "/";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ink-100 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-ink-100/60 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2 font-display text-xl font-semibold text-brand-700">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
-            <Home className="h-5 w-5" />
+        <Link to="/" className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-sm font-bold text-white shadow-sm">
+            NY
           </span>
-          Nyumba Yangu
+          <span className="font-display text-lg font-semibold text-ink-900">
+            Nyumba Yangu
+          </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm font-medium text-ink-600 md:flex">
-          <Link to="/listings" className="hover:text-brand-700">Browse listings</Link>
-          <Link to="/wishlist" className="relative flex items-center gap-1.5 hover:text-brand-700">
+        <nav className="hidden items-center gap-1 md:flex">
+          <Link
+            to="/listings"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900"
+          >
+            Browse
+          </Link>
+          <Link
+            to="/wishlist"
+            className="relative flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900"
+          >
             <Heart className="h-4 w-4" />
-            Wishlist
+            Saved
             {ids.size > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-semibold text-white">
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
                 {ids.size}
               </span>
             )}
           </Link>
           {user ? (
             <>
-              <Link to={dashboardPath} className="hover:text-brand-700">Dashboard</Link>
-              <button onClick={handleLogout} className="btn-secondary !px-3 !py-1.5">Log out</button>
+              <Link
+                to={dashboardPath}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900"
+              >
+                Dashboard
+              </Link>
+              <div className="ml-2 h-6 w-px bg-ink-200" />
+              <button onClick={handleLogout} className="ml-2 btn-secondary !px-3.5 !py-1.5 !text-xs">
+                Log out
+              </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:text-brand-700">Log in</Link>
-              <Link to="/register" className="btn-primary !px-4 !py-2">List your property</Link>
+              <div className="ml-2 h-6 w-px bg-ink-200" />
+              <Link
+                to="/login"
+                className="ml-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900"
+              >
+                Sign in
+              </Link>
+              <Link to="/register" className="ml-1 btn-primary !px-4 !py-2 !text-xs">
+                Get started
+              </Link>
             </>
           )}
         </nav>
 
         <button className="md:hidden" onClick={() => setOpen((o) => !o)} aria-label="Toggle menu">
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {open ? <X className="h-6 w-6 text-ink-700" /> : <Menu className="h-6 w-6 text-ink-700" />}
         </button>
       </div>
 
       {open && (
-        <div className="border-t border-ink-100 bg-white px-4 py-3 md:hidden">
-          <div className="flex flex-col gap-3 text-sm font-medium text-ink-600">
-            <Link to="/listings" onClick={() => setOpen(false)}>Browse listings</Link>
-            <Link to="/wishlist" onClick={() => setOpen(false)}>Wishlist {ids.size > 0 && `(${ids.size})`}</Link>
+        <div className="border-t border-ink-100 bg-white px-4 pb-4 pt-3 md:hidden">
+          <div className="flex flex-col gap-1">
+            <MobileLink to="/listings" onClick={() => setOpen(false)}>Browse</MobileLink>
+            <MobileLink to="/wishlist" onClick={() => setOpen(false)}>
+              Saved {ids.size > 0 && `(${ids.size})`}
+            </MobileLink>
             {user ? (
               <>
-                <Link to={dashboardPath} onClick={() => setOpen(false)}>Dashboard</Link>
-                <button className="text-left" onClick={() => { setOpen(false); handleLogout(); }}>Log out</button>
+                <MobileLink to={dashboardPath} onClick={() => setOpen(false)}>Dashboard</MobileLink>
+                <button
+                  className="rounded-lg px-3 py-2.5 text-left text-sm font-medium text-ink-600 hover:bg-ink-50"
+                  onClick={() => { setOpen(false); handleLogout(); }}
+                >
+                  Log out
+                </button>
               </>
             ) : (
               <>
-                <Link to="/login" onClick={() => setOpen(false)}>Log in</Link>
-                <Link to="/register" onClick={() => setOpen(false)}>List your property</Link>
+                <MobileLink to="/login" onClick={() => setOpen(false)}>Sign in</MobileLink>
+                <MobileLink to="/register" onClick={() => setOpen(false)}>Get started</MobileLink>
               </>
             )}
           </div>
         </div>
       )}
     </header>
+  );
+}
+
+function MobileLink({ to, onClick, children }: { to: string; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink-600 hover:bg-ink-50"
+    >
+      {children}
+    </Link>
   );
 }
