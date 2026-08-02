@@ -40,6 +40,160 @@
   --color-ink-950: #0a0b0c;
 }
 
+/*
+ * Theme palettes. Default (no data-theme, or data-theme="meridian") is the
+ * palette defined in @theme above. Each Vercel deployment sets VITE_THEME
+ * at build time (see main.tsx), which sets data-theme on <html> and lets
+ * one of the blocks below override the brand/sun/ink variables.
+ */
+:root[data-theme="terracotta"] {
+  --color-brand-50: #fdf3ef;
+  --color-brand-100: #fbe2d6;
+  --color-brand-200: #f5c3ab;
+  --color-brand-300: #eb9c78;
+  --color-brand-400: #e07548;
+  --color-brand-500: #d15a2c;
+  --color-brand-600: #b1441f;
+  --color-brand-700: #8f371c;
+  --color-brand-800: #742f1b;
+  --color-brand-900: #5f2919;
+  --color-brand-950: #33130b;
+
+  --color-sun-50: #fffaeb;
+  --color-sun-100: #fff0c2;
+  --color-sun-200: #ffdd85;
+  --color-sun-300: #ffc247;
+  --color-sun-400: #ffa61b;
+  --color-sun-500: #f78606;
+  --color-sun-600: #d66502;
+  --color-sun-700: #b04606;
+  --color-sun-800: #8f380c;
+  --color-sun-900: #762f0e;
+
+  --color-ink-50: #faf8f6;
+  --color-ink-100: #f0ebe6;
+  --color-ink-200: #e2d9d1;
+  --color-ink-300: #c7b8ac;
+  --color-ink-400: #a4907f;
+  --color-ink-500: #8a7562;
+  --color-ink-600: #6b5847;
+  --color-ink-700: #4f4033;
+  --color-ink-800: #382d24;
+  --color-ink-900: #241d17;
+  --color-ink-950: #120e0b;
+}
+
+:root[data-theme="coastal"] {
+  --color-brand-50: #eef6fb;
+  --color-brand-100: #d6ecf6;
+  --color-brand-200: #aed8ed;
+  --color-brand-300: #7cbfe0;
+  --color-brand-400: #4a9ecf;
+  --color-brand-500: #2f80b8;
+  --color-brand-600: #24659a;
+  --color-brand-700: #1f527c;
+  --color-brand-800: #1c4265;
+  --color-brand-900: #1a3752;
+  --color-brand-950: #0f2130;
+
+  --color-sun-50: #fff5f0;
+  --color-sun-100: #ffe4d6;
+  --color-sun-200: #ffc4a8;
+  --color-sun-300: #ff9d73;
+  --color-sun-400: #fc7a48;
+  --color-sun-500: #f25a26;
+  --color-sun-600: #d4401a;
+  --color-sun-700: #ad3018;
+  --color-sun-800: #8c2a1a;
+  --color-sun-900: #74271a;
+
+  --color-ink-50: #f6f8fa;
+  --color-ink-100: #ebeef2;
+  --color-ink-200: #d9dfe6;
+  --color-ink-300: #b5c0cc;
+  --color-ink-400: #8998a8;
+  --color-ink-500: #6c7c8d;
+  --color-ink-600: #536171;
+  --color-ink-700: #3e4854;
+  --color-ink-800: #2b323b;
+  --color-ink-900: #1b1f25;
+  --color-ink-950: #0d0f12;
+}
+
+:root[data-theme="forest"] {
+  --color-brand-50: #f2f7ee;
+  --color-brand-100: #e2edd7;
+  --color-brand-200: #c5dcae;
+  --color-brand-300: #a0c47e;
+  --color-brand-400: #7ba854;
+  --color-brand-500: #5c8a38;
+  --color-brand-600: #476c2b;
+  --color-brand-700: #395525;
+  --color-brand-800: #2f4521;
+  --color-brand-900: #28391f;
+  --color-brand-950: #131f0f;
+
+  --color-sun-50: #fdf8ec;
+  --color-sun-100: #f9ecc6;
+  --color-sun-200: #f2d788;
+  --color-sun-300: #eabc4c;
+  --color-sun-400: #dfa025;
+  --color-sun-500: #c6811a;
+  --color-sun-600: #a26314;
+  --color-sun-700: #814a15;
+  --color-sun-800: #693c17;
+  --color-sun-900: #573217;
+
+  --color-ink-50: #f8f7f3;
+  --color-ink-100: #ece9e0;
+  --color-ink-200: #dad4c4;
+  --color-ink-300: #bcb29a;
+  --color-ink-400: #99896c;
+  --color-ink-500: #7d6f56;
+  --color-ink-600: #635944;
+  --color-ink-700: #4a4234;
+  --color-ink-800: #332e25;
+  --color-ink-900: #211d17;
+  --color-ink-950: #100e0b;
+}
+
+:root[data-theme="monochrome"] {
+  --color-brand-50: #f7f7f7;
+  --color-brand-100: #ececec;
+  --color-brand-200: #d6d6d6;
+  --color-brand-300: #b3b3b3;
+  --color-brand-400: #8a8a8a;
+  --color-brand-500: #6b6b6b;
+  --color-brand-600: #525252;
+  --color-brand-700: #3d3d3d;
+  --color-brand-800: #2a2a2a;
+  --color-brand-900: #1a1a1a;
+  --color-brand-950: #0a0a0a;
+
+  --color-sun-50: #f8f8f9;
+  --color-sun-100: #eef0f1;
+  --color-sun-200: #dadee1;
+  --color-sun-300: #b9c0c5;
+  --color-sun-400: #939da5;
+  --color-sun-500: #76818a;
+  --color-sun-600: #5c666e;
+  --color-sun-700: #454d54;
+  --color-sun-800: #30363b;
+  --color-sun-900: #1e2226;
+
+  --color-ink-50: #fafafa;
+  --color-ink-100: #f0f0f0;
+  --color-ink-200: #e0e0e0;
+  --color-ink-300: #bdbdbd;
+  --color-ink-400: #8f8f8f;
+  --color-ink-500: #707070;
+  --color-ink-600: #545454;
+  --color-ink-700: #3d3d3d;
+  --color-ink-800: #262626;
+  --color-ink-900: #171717;
+  --color-ink-950: #0a0a0a;
+}
+
 @layer base {
   html {
     font-family: var(--font-sans);
