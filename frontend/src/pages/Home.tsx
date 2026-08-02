@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Search, ShieldCheck, Wallet, FileText, Smartphone, ArrowRight, MapPin } from "lucide-react";
 import { api, type Listing } from "../lib/api";
 import { ListingCard } from "../components/ListingCard";
+import { RecentlyViewedStrip } from "../components/RecentlyViewedStrip";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
 
 export function Home() {
@@ -92,6 +93,8 @@ export function Home() {
           </div>
         </div>
       </section>
+
+      <RecentlyViewedStrip />
 
       {/* Featured listings */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
