@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./lib/auth-context";
 import { WishlistProvider } from "./lib/wishlist-context";
+import { ThemeProvider } from "./lib/theme-context";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -27,10 +28,11 @@ import { AdminVerification } from "./pages/admin/AdminVerification";
 
 export default function App() {
   return (
+    <ThemeProvider>
     <BrowserRouter>
       <AuthProvider>
         <WishlistProvider>
-        <div className="flex min-h-screen flex-col bg-ink-50">
+        <div className="flex min-h-screen flex-col bg-surface-sunken">
           <Navbar />
           <main className="flex-1">
             <Routes>
@@ -90,5 +92,6 @@ export default function App() {
         </WishlistProvider>
       </AuthProvider>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }

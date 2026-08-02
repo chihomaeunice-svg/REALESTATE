@@ -2,6 +2,7 @@
 backend/tmp/
 backend/*.exe
 backend/nyumbayangu-api
+backend/uploads/
 *.log
 
 # Env files

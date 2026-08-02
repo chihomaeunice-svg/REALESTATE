@@ -6,6 +6,9 @@ import { formatTZS, formatDate } from "../lib/format";
 import { VerifiedBadge } from "../components/VerifiedBadge";
 import { WishlistButton } from "../components/WishlistButton";
 import { PROPERTY_TYPE_LABEL, NO_UNIT_TYPES } from "../lib/constants";
+import { recordView } from "../lib/recently-viewed";
+import { RecentlyViewedStrip } from "../components/RecentlyViewedStrip";
+import { SimilarListings } from "../components/SimilarListings";
 
 export function ListingDetail() {
   const { id } = useParams();
@@ -16,7 +19,7 @@ export function ListingDetail() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (id) api.get<Listing>(`/listings/${id}`).then(setListing);
+    if (id) api.get<Listing>(`/listings/${id}`).then((l) => { setListing(l); recordView(l.id); });
   }, [id]);
 
   async function submitInquiry(e: React.FormEvent) {
@@ -51,6 +54,7 @@ export function ListingDetail() {
   const waLink = `https://wa.me/${waPhone}?text=${waMessage}`;
 
   return (
+    <>
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       <Link to="/listings" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 transition hover:text-ink-700">
         <ArrowLeft className="h-4 w-4" /> Back to listings
@@ -173,13 +177,17 @@ export function ListingDetail() {
           </div>
         </aside>
       </div>
+
+      <SimilarListings listing={listing} />
     </div>
+    <RecentlyViewedStrip excludeId={listing.id} />
+    </>
   );
 }
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm text-ink-600 shadow-sm ring-1 ring-ink-100">
+    <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface px-3 py-2 text-sm text-ink-600 shadow-sm ring-1 ring-ink-100">
       {children}
     </span>
   );

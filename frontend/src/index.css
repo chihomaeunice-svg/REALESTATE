@@ -4,40 +4,53 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
 
-  --color-brand-50: #eef6f4;
-  --color-brand-100: #d6ebe4;
-  --color-brand-200: #aed7cb;
-  --color-brand-300: #7cbdac;
-  --color-brand-400: #4d9d8a;
-  --color-brand-500: #2f8170;
-  --color-brand-600: #22685a;
-  --color-brand-700: #1c534a;
-  --color-brand-800: #17423b;
-  --color-brand-900: #123531;
-  --color-brand-950: #091d1a;
+  /* Brand blue — primary CTAs, links, active states */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #131f4d;
 
-  --color-sun-50: #fff8ec;
-  --color-sun-100: #ffedc7;
-  --color-sun-200: #ffd889;
-  --color-sun-300: #ffbe4d;
-  --color-sun-400: #ffa620;
-  --color-sun-500: #f98907;
-  --color-sun-600: #dd6602;
-  --color-sun-700: #b74806;
-  --color-sun-800: #94380c;
-  --color-sun-900: #7a300d;
+  /* Gold — the logo's accent, used sparingly (highlights, "verified", premium) */
+  --color-sun-50: #fffbeb;
+  --color-sun-100: #fef3c7;
+  --color-sun-200: #fde68a;
+  --color-sun-300: #fcd34d;
+  --color-sun-400: #fbbf24;
+  --color-sun-500: #f59e0b;
+  --color-sun-600: #d97706;
+  --color-sun-700: #b45309;
+  --color-sun-800: #92400e;
+  --color-sun-900: #78350f;
 
-  --color-ink-50: #f8f9fa;
-  --color-ink-100: #e9ecef;
-  --color-ink-200: #dee2e6;
-  --color-ink-300: #adb5bd;
-  --color-ink-400: #868e96;
-  --color-ink-500: #6c757d;
-  --color-ink-600: #495057;
-  --color-ink-700: #343a40;
-  --color-ink-800: #212529;
-  --color-ink-900: #141618;
-  --color-ink-950: #0a0b0c;
+  /* Ink — cool slate neutrals for text/surfaces */
+  --color-ink-50: #f8fafc;
+  --color-ink-100: #f1f5f9;
+  --color-ink-200: #e2e8f0;
+  --color-ink-300: #cbd5e1;
+  --color-ink-400: #94a3b8;
+  --color-ink-500: #64748b;
+  --color-ink-600: #475569;
+  --color-ink-700: #334155;
+  --color-ink-800: #1e293b;
+  --color-ink-900: #0f172a;
+  --color-ink-950: #020617;
+
+  /* Surface tokens — the ones that actually flip between light and dark.
+     Tailwind auto-generates variant-aware utilities from these (bg-surface,
+     hover:bg-surface, text-text-muted, etc.) since they're plain --color-* keys. */
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f8fafc;
+  --color-surface-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-text-faint: #94a3b8;
 }
 
 @layer base {
@@ -47,13 +60,85 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* System preference, unless the user has explicitly picked one via the toggle */
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) {
+      color-scheme: dark;
+      --color-surface: #0b1220;
+      --color-surface-sunken: #060a14;
+      --color-surface-border: #1e2a3f;
+      --color-text: #f1f5f9;
+      --color-text-muted: #94a3b8;
+      --color-text-faint: #64748b;
+
+      --color-ink-50: #131c2e;
+      --color-ink-100: #1a2438;
+      --color-ink-200: #26314a;
+      --color-ink-300: #3a4863;
+      --color-ink-400: #64748b;
+      --color-ink-500: #94a3b8;
+      --color-ink-600: #cbd5e1;
+      --color-ink-700: #e2e8f0;
+      --color-ink-800: #f1f5f9;
+      --color-ink-900: #f8fafc;
+      --color-ink-950: #ffffff;
+
+      --color-brand-50: #0f1d3d;
+      --color-brand-100: #14275a;
+      --color-brand-600: #4d8dfd;
+      --color-brand-700: #7cabff;
+
+      --color-sun-50: #2a2005;
+      --color-sun-100: #3d2e08;
+    }
+  }
+
+  /* Explicit toggle override, wins over system preference in both directions */
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --color-surface: #0b1220;
+    --color-surface-sunken: #060a14;
+    --color-surface-border: #1e2a3f;
+    --color-text: #f1f5f9;
+    --color-text-muted: #94a3b8;
+    --color-text-faint: #64748b;
+
+    --color-ink-50: #131c2e;
+    --color-ink-100: #1a2438;
+    --color-ink-200: #26314a;
+    --color-ink-300: #3a4863;
+    --color-ink-400: #64748b;
+    --color-ink-500: #94a3b8;
+    --color-ink-600: #cbd5e1;
+    --color-ink-700: #e2e8f0;
+    --color-ink-800: #f1f5f9;
+    --color-ink-900: #f8fafc;
+    --color-ink-950: #ffffff;
+
+    --color-brand-50: #0f1d3d;
+    --color-brand-100: #14275a;
+    --color-brand-600: #4d8dfd;
+    --color-brand-700: #7cabff;
+
+    --color-sun-50: #2a2005;
+    --color-sun-100: #3d2e08;
+  }
+
+  html[data-theme="light"] {
+    color-scheme: light;
+  }
+
   body {
-    @apply bg-ink-50 text-ink-700 antialiased;
+    @apply antialiased;
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
     text-rendering: optimizeLegibility;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
   h1, h2, h3 {
-    font-family: var(--font-display);
-    @apply text-ink-900;
+    @apply font-semibold;
+    color: var(--color-text);
   }
   ::selection {
     @apply bg-brand-100 text-brand-900;
@@ -65,21 +150,37 @@
     @apply inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-200;
   }
   .card {
-    @apply rounded-2xl bg-white shadow-sm ring-1 ring-ink-100/80;
+    border-radius: 1rem;
+    background: var(--color-surface);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    border: 1px solid var(--color-surface-border);
   }
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-brand-700 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-ink-700 shadow-sm ring-1 ring-inset ring-ink-200 transition-all duration-200 hover:bg-ink-50 hover:ring-ink-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm ring-1 ring-inset transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    background: var(--color-surface);
+    color: var(--color-text);
+    --tw-ring-color: var(--color-surface-border);
+  }
+  .btn-secondary:hover {
+    background: var(--color-surface-sunken);
   }
   .btn-accent {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-sun-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-sun-600 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-sun-500 px-5 py-2.5 text-sm font-semibold text-ink-950 shadow-sm transition-all duration-200 hover:bg-sun-600 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
   .input {
-    @apply w-full rounded-xl border border-ink-200 bg-white px-3.5 py-2.5 text-sm text-ink-800 placeholder:text-ink-400 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100;
+    @apply w-full rounded-xl border px-3.5 py-2.5 text-sm transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100;
+    background: var(--color-surface);
+    border-color: var(--color-surface-border);
+    color: var(--color-text);
+  }
+  .input::placeholder {
+    color: var(--color-text-faint);
   }
   .label {
-    @apply mb-1.5 block text-sm font-medium text-ink-600;
+    @apply mb-1.5 block text-sm font-medium;
+    color: var(--color-text-muted);
   }
 }

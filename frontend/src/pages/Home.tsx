@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Search, ShieldCheck, Wallet, FileText, Smartphone, ArrowRight, MapPin } from "lucide-react";
 import { api, type Listing } from "../lib/api";
 import { ListingCard } from "../components/ListingCard";
+import { RecentlyViewedStrip } from "../components/RecentlyViewedStrip";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
 
 export function Home() {
@@ -41,7 +42,7 @@ export function Home() {
             Dar es Salaam
           </div>
           <h1 className="mt-4 max-w-xl text-4xl font-semibold leading-[1.15] tracking-tight text-white sm:text-5xl lg:text-[3.5rem]">
-            Find your next home, verified and ready.
+            Find your next home, <span className="font-display italic font-normal text-sun-400">verified</span> and ready.
           </h1>
           <p className="mt-5 max-w-lg text-base leading-relaxed text-brand-200/90">
             Browse verified rentals and listings across Dar es Salaam.
@@ -50,7 +51,7 @@ export function Home() {
 
           <form
             onSubmit={handleSearch}
-            className="mt-10 flex flex-col gap-3 rounded-2xl bg-white/95 p-3 shadow-2xl backdrop-blur-sm sm:flex-row sm:items-center"
+            className="mt-10 flex flex-col gap-3 rounded-2xl bg-surface/95 p-3 shadow-2xl backdrop-blur-sm sm:flex-row sm:items-center"
           >
             <select
               value={district}
@@ -93,6 +94,8 @@ export function Home() {
         </div>
       </section>
 
+      <RecentlyViewedStrip />
+
       {/* Featured listings */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
         <div className="flex items-end justify-between">
@@ -125,12 +128,12 @@ export function Home() {
       </section>
 
       {/* Features */}
-      <section className="border-t border-ink-100 bg-white py-16 lg:py-20">
+      <section className="border-t border-surface-border bg-surface py-16 lg:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">For landlords</p>
             <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">
-              The listing is just the beginning
+              The listing is just the <span className="font-display italic font-normal text-brand-600">beginning</span>
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-ink-500">
               Once a tenant is placed, manage everything from leases to rent collection
