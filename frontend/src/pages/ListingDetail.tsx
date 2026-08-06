@@ -9,7 +9,6 @@ import { PROPERTY_TYPE_LABEL, NO_UNIT_TYPES } from "../lib/constants";
 import { recordView } from "../lib/recently-viewed";
 import { RecentlyViewedStrip } from "../components/RecentlyViewedStrip";
 import { SimilarListings } from "../components/SimilarListings";
-import { MortgageCalculator } from "../components/MortgageCalculator";
 
 export function ListingDetail() {
   const { id } = useParams();
@@ -176,7 +175,6 @@ export function ListingDetail() {
               )}
             </div>
           </div>
-          {listing.purpose === "sale" && <MortgageCalculator price={listing.price} />}
         </aside>
       </div>
 
