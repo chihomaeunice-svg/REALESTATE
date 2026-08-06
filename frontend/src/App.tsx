@@ -5,6 +5,7 @@ import { ThemeProvider } from "./lib/theme-context";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { UpdateBanner } from "./components/UpdateBanner";
 
 import { Home } from "./pages/Home";
 import { Listings } from "./pages/Listings";
@@ -88,6 +89,7 @@ export default function App() {
             </Routes>
           </main>
           <Footer />
+          <UpdateBanner />
         </div>
         </WishlistProvider>
       </AuthProvider>
