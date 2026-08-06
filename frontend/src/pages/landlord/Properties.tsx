@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Plus, ChevronDown, ChevronUp, MapPin, X } from "lucide-react";
-import { api, type Property, type Unit } from "../../lib/api";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, ChevronDown, ChevronUp, MapPin, X, Eye } from "lucide-react";
+import { api, type Property, type Unit, type Listing } from "../../lib/api";
 import { formatTZS } from "../../lib/format";
 import { VerifiedBadge } from "../../components/VerifiedBadge";
 import { DAR_DISTRICTS, PROPERTY_TYPES, NO_UNIT_TYPES } from "../../lib/constants";
@@ -9,14 +9,30 @@ import { useAuth } from "../../lib/auth-context";
 export function Properties() {
   const { user } = useAuth();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   function load() {
     api.get<Property[]>("/properties").then(setProperties);
+    // The public browse endpoint carries view_count; cross-reference by
+    // property/unit id to show sellers how their own listings are performing.
+    api.get<Listing[]>("/listings").then(setListings).catch(() => {});
   }
 
   useEffect(load, []);
+
+  const listingsByPropertyId = useMemo(() => {
+    const map = new Map<string, Listing>();
+    for (const l of listings) if (!l.unit_id) map.set(l.property_id, l);
+    return map;
+  }, [listings]);
+
+  const listingsByUnitId = useMemo(() => {
+    const map = new Map<string, Listing>();
+    for (const l of listings) if (l.unit_id) map.set(l.unit_id, l);
+    return map;
+  }, [listings]);
 
   return (
     <div>
@@ -50,8 +66,8 @@ export function Properties() {
 
             {expanded === p.id && (
               NO_UNIT_TYPES.has(p.property_type)
-                ? <LandListingPanel property={p} landlordPhone={user?.phone ?? ""} />
-                : <UnitsPanel property={p} landlordPhone={user?.phone ?? ""} />
+                ? <LandListingPanel property={p} landlordPhone={user?.phone ?? ""} listing={listingsByPropertyId.get(p.id)} />
+                : <UnitsPanel property={p} landlordPhone={user?.phone ?? ""} listingsByUnitId={listingsByUnitId} />
             )}
           </div>
         ))}
@@ -147,7 +163,16 @@ function NewPropertyForm({ onDone, onCancel }: { onDone: () => void; onCancel: (
   );
 }
 
-function LandListingPanel({ property, landlordPhone }: { property: Property; landlordPhone: string }) {
+function ViewCountBadge({ listing }: { listing?: Listing }) {
+  if (!listing) return null;
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-ink-50 px-2 py-0.5 text-xs font-medium text-ink-500">
+      <Eye className="h-3 w-3" /> {listing.view_count} view{listing.view_count === 1 ? "" : "s"}
+    </span>
+  );
+}
+
+function LandListingPanel({ property, landlordPhone, listing }: { property: Property; landlordPhone: string; listing?: Listing }) {
   const [form, setForm] = useState({ price: 0, price_period: "total", description: "" });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -178,9 +203,10 @@ function LandListingPanel({ property, landlordPhone }: { property: Property; lan
 
   return (
     <div className="mt-4 border-t border-ink-100 pt-4">
-      <div className="mb-3 flex flex-wrap gap-3 text-sm text-ink-500">
+      <div className="mb-3 flex flex-wrap items-center gap-3 text-sm text-ink-500">
         {property.land_size_acres && <span>{property.land_size_acres} acres</span>}
         {property.title_deed_status && <span>· {property.title_deed_status}</span>}
+        <ViewCountBadge listing={listing} />
       </div>
       {published ? (
         <p className="text-sm font-medium text-brand-700">Listing published — it's now live on the public marketplace.</p>
@@ -201,7 +227,7 @@ function LandListingPanel({ property, landlordPhone }: { property: Property; lan
   );
 }
 
-function UnitsPanel({ property, landlordPhone }: { property: Property; landlordPhone: string }) {
+function UnitsPanel({ property, landlordPhone, listingsByUnitId }: { property: Property; landlordPhone: string; listingsByUnitId: Map<string, Listing> }) {
   const [units, setUnits] = useState<Unit[]>([]);
   const [showForm, setShowForm] = useState(false);
 
@@ -232,12 +258,13 @@ function UnitsPanel({ property, landlordPhone }: { property: Property; landlordP
                 <th className="pb-2">Beds/Baths</th>
                 <th className="pb-2">Rent</th>
                 <th className="pb-2">Status</th>
+                <th className="pb-2">Views</th>
                 <th className="pb-2"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink-100">
               {units.map((u) => (
-                <UnitRow key={u.id} unit={u} propertyId={property.id} landlordPhone={landlordPhone} onListed={load} />
+                <UnitRow key={u.id} unit={u} propertyId={property.id} landlordPhone={landlordPhone} onListed={load} listing={listingsByUnitId.get(u.id)} />
               ))}
             </tbody>
           </table>
@@ -274,7 +301,7 @@ function NewUnitForm({ propertyId, onDone }: { propertyId: string; onDone: () =>
   );
 }
 
-function UnitRow({ unit, propertyId, landlordPhone, onListed }: { unit: Unit; propertyId: string; landlordPhone: string; onListed: () => void }) {
+function UnitRow({ unit, propertyId, landlordPhone, onListed, listing }: { unit: Unit; propertyId: string; landlordPhone: string; onListed: () => void; listing?: Listing }) {
   const [publishing, setPublishing] = useState(false);
 
   async function publishListing() {
@@ -304,6 +331,7 @@ function UnitRow({ unit, propertyId, landlordPhone, onListed }: { unit: Unit; pr
           {unit.status}
         </span>
       </td>
+      <td className="py-2"><ViewCountBadge listing={listing} /></td>
       <td className="py-2 text-right">
         {unit.status === "vacant" && (
           <button onClick={publishListing} disabled={publishing} className="text-xs font-semibold text-brand-600 hover:text-brand-700">
