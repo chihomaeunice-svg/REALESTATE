@@ -4,7 +4,7 @@ import { api, clearToken, getToken, setToken, type User } from "./api";
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  login: (phone: string, password: string) => Promise<User>;
+  login: (identifier: string, password: string, method?: "email" | "phone") => Promise<User>;
   register: (payload: RegisterPayload) => Promise<User>;
   sendOTP: (email: string) => Promise<void>;
   verifyOTP: (email: string, code: string) => Promise<User>;
@@ -50,8 +50,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function login(phone: string, password: string) {
-    const res = await api.post<{ token: string; user: User }>("/auth/login", { phone, password });
+  async function login(identifier: string, password: string, method: "email" | "phone" = "phone") {
+    const body = method === "email"
+      ? { email: identifier, password }
+      : { phone: identifier, password };
+    const res = await api.post<{ token: string; user: User }>("/auth/login", body);
     setToken(res.token);
     setUser(res.user);
     return res.user;

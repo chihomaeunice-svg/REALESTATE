@@ -33,7 +33,9 @@ export function Register() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [nidaNumber, setNidaNumber] = useState("");
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
@@ -49,6 +51,10 @@ export function Register() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     if (!agreedTerms) {
       setError("Please accept the terms and conditions to continue.");
       return;
@@ -302,6 +308,36 @@ export function Register() {
                   {strength.label}
                 </p>
               </div>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label className="label">Confirm password</label>
+            <div className="relative">
+              <input
+                required
+                type={showConfirmPassword ? "text" : "password"}
+                className={`input !pr-11 ${
+                  confirmPassword && confirmPassword !== password
+                    ? "!border-red-400 focus:!ring-red-100"
+                    : ""
+                }`}
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 transition hover:text-ink-600"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+              </button>
+            </div>
+            {confirmPassword && confirmPassword !== password && (
+              <p className="mt-1 text-xs text-red-500">Passwords do not match</p>
             )}
           </div>
 

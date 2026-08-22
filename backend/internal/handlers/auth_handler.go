@@ -96,6 +96,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 type loginRequest struct {
 	Phone    string `json:"phone"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -106,14 +107,30 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Email == "" && req.Phone == "" {
+		httpx.Error(w, http.StatusBadRequest, "email or phone is required")
+		return
+	}
+
 	var user models.User
-	err := h.DB.QueryRow(context.Background(), `
-		SELECT id, phone, email, password_hash, full_name, role, nida_number, business_license, verification, created_at
-		FROM users WHERE phone=$1
-	`, req.Phone).Scan(
-		&user.ID, &user.Phone, &user.Email, &user.PasswordHash, &user.FullName, &user.Role,
-		&user.NidaNumber, &user.BusinessLicense, &user.Verification, &user.CreatedAt,
-	)
+	var err error
+	if req.Email != "" {
+		err = h.DB.QueryRow(context.Background(), `
+			SELECT id, COALESCE(phone,''), email, COALESCE(password_hash,''), full_name, role, nida_number, business_license, verification, created_at
+			FROM users WHERE email=$1
+		`, req.Email).Scan(
+			&user.ID, &user.Phone, &user.Email, &user.PasswordHash, &user.FullName, &user.Role,
+			&user.NidaNumber, &user.BusinessLicense, &user.Verification, &user.CreatedAt,
+		)
+	} else {
+		err = h.DB.QueryRow(context.Background(), `
+			SELECT id, COALESCE(phone,''), email, COALESCE(password_hash,''), full_name, role, nida_number, business_license, verification, created_at
+			FROM users WHERE phone=$1
+		`, req.Phone).Scan(
+			&user.ID, &user.Phone, &user.Email, &user.PasswordHash, &user.FullName, &user.Role,
+			&user.NidaNumber, &user.BusinessLicense, &user.Verification, &user.CreatedAt,
+		)
+	}
 	if err == pgx.ErrNoRows {
 		httpx.Error(w, http.StatusUnauthorized, "invalid credentials")
 		return
@@ -122,7 +139,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !auth.CheckPassword(user.PasswordHash, req.Password) {
+	if user.PasswordHash == "" || !auth.CheckPassword(user.PasswordHash, req.Password) {
 		httpx.Error(w, http.StatusUnauthorized, "invalid credentials")
 		return
 	}
