@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SlidersHorizontal, X } from "lucide-react";
 import { api, type Listing } from "../lib/api";
 import { ListingCard } from "../components/ListingCard";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
+
+const BEDROOM_OPTIONS = [1, 2, 3, 4];
+type SortOption = "newest" | "price_asc" | "price_desc";
 
 export function Listings() {
   const [params, setParams] = useSearchParams();
@@ -13,7 +16,10 @@ export function Listings() {
   const district = params.get("district") ?? "";
   const propertyType = params.get("property_type") ?? "";
   const purpose = params.get("purpose") ?? "";
+  const minPrice = params.get("min_price") ?? "";
   const maxPrice = params.get("max_price") ?? "";
+  const bedrooms = params.get("bedrooms") ?? "";
+  const sort = (params.get("sort") as SortOption) || "newest";
 
   useEffect(() => {
     setLoading(true);
@@ -21,12 +27,21 @@ export function Listings() {
     if (district) query.set("district", district);
     if (propertyType) query.set("property_type", propertyType);
     if (purpose) query.set("purpose", purpose);
+    if (minPrice) query.set("min_price", minPrice);
     if (maxPrice) query.set("max_price", maxPrice);
+    if (bedrooms) query.set("bedrooms", bedrooms);
     api
       .get<Listing[]>(`/listings?${query.toString()}`)
       .then(setListings)
       .finally(() => setLoading(false));
-  }, [district, propertyType, purpose, maxPrice]);
+  }, [district, propertyType, purpose, minPrice, maxPrice, bedrooms]);
+
+  const sortedListings = useMemo(() => {
+    const copy = [...listings];
+    if (sort === "price_asc") copy.sort((a, b) => a.price - b.price);
+    else if (sort === "price_desc") copy.sort((a, b) => b.price - a.price);
+    return copy;
+  }, [listings, sort]);
 
   function update(key: string, value: string) {
     const next = new URLSearchParams(params);
@@ -35,7 +50,7 @@ export function Listings() {
     setParams(next);
   }
 
-  const activeFilters = [district, propertyType, purpose, maxPrice].filter(Boolean).length;
+  const activeFilters = [district, propertyType, purpose, minPrice, maxPrice, bedrooms].filter(Boolean).length;
 
   function clearAll() {
     setParams(new URLSearchParams());
@@ -72,6 +87,17 @@ export function Listings() {
           <option value="rent">For rent</option>
           <option value="sale">For sale</option>
         </select>
+        <select value={bedrooms} onChange={(e) => update("bedrooms", e.target.value)} className="input !w-auto !py-2">
+          <option value="">Any bedrooms</option>
+          {BEDROOM_OPTIONS.map((n) => <option key={n} value={n}>{n}+ beds</option>)}
+        </select>
+        <input
+          type="number"
+          placeholder="Min price"
+          value={minPrice}
+          onChange={(e) => update("min_price", e.target.value)}
+          className="input !w-32 !py-2"
+        />
         <input
           type="number"
           placeholder="Max price"
@@ -79,6 +105,15 @@ export function Listings() {
           onChange={(e) => update("max_price", e.target.value)}
           className="input !w-32 !py-2"
         />
+        <select
+          value={sort}
+          onChange={(e) => update("sort", e.target.value === "newest" ? "" : e.target.value)}
+          className="input !w-auto !py-2 ml-auto"
+        >
+          <option value="newest">Newest first</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+        </select>
       </div>
 
       <div className="mt-8">
@@ -95,14 +130,14 @@ export function Listings() {
               </div>
             ))}
           </div>
-        ) : listings.length === 0 ? (
+        ) : sortedListings.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-lg font-medium text-ink-400">No listings match those filters.</p>
             <p className="mt-1 text-sm text-ink-400">Try broadening your search or clearing filters.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
+            {sortedListings.map((l) => <ListingCard key={l.id} listing={l} />)}
           </div>
         )}
       </div>
