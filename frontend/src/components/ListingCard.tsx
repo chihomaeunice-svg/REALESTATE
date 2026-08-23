@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { BedDouble, Bath, MapPin, Ruler } from "lucide-react";
 import type { Listing } from "../lib/api";
-import { formatTZS } from "../lib/format";
+import { useCurrency } from "../lib/currency-context";
 import { VerifiedBadge } from "./VerifiedBadge";
 import { WishlistButton } from "./WishlistButton";
 import { PROPERTY_TYPE_LABEL, NO_UNIT_TYPES } from "../lib/constants";
 
 export function ListingCard({ listing }: { listing: Listing }) {
+  const { format } = useCurrency();
   const image = listing.images?.[0] ?? placeholderFor(listing.id);
   const isLand = NO_UNIT_TYPES.has(listing.property_type);
 
@@ -37,7 +38,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
       </div>
       <div className="flex flex-1 flex-col p-4">
         <p className="text-lg font-semibold text-ink-900">
-          {formatTZS(listing.price)}
+          {format(listing.price)}
           {listing.price_period !== "total" && (
             <span className="text-sm font-normal text-ink-400"> /{listing.price_period}</span>
           )}
