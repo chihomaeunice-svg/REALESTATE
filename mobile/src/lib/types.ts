@@ -50,6 +50,9 @@ export interface Property {
   city: string;
   land_size_acres?: number;
   title_deed_status?: string;
+  has_fence: boolean;
+  has_security_gate: boolean;
+  has_parking: boolean;
   verification: Verification;
   created_at: string;
 }
@@ -62,7 +65,14 @@ export interface Unit {
   bathrooms: number;
   size_sqm?: number;
   rent_amount: number;
-  status: "vacant" | "occupied" | "maintenance";
+  status: "vacant" | "occupied" | "maintenance" | "under_renovation";
+  meter_type?: string;
+  water_source?: string;
+  has_fence: boolean;
+  has_security_gate: boolean;
+  has_balcony: boolean;
+  master_bedrooms: number;
+  has_parking: boolean;
   created_at: string;
   property_title?: string;
 }
@@ -166,4 +176,19 @@ export interface Subscription {
   unit_count: number;
   price_tzs: number;
   created_at: string;
+}
+
+export interface MaintenanceRequest {
+  id: string;
+  unit_id: string;
+  tenant_user_id: string;
+  title: string;
+  description?: string;
+  priority: "low" | "medium" | "high" | "urgent";
+  status: "open" | "in_progress" | "completed" | "closed";
+  created_at: string;
+  updated_at: string;
+  unit_label?: string;
+  property_title?: string;
+  tenant_name?: string;
 }

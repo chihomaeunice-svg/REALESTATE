@@ -275,14 +275,23 @@ function UnitsPanel({ property, landlordPhone, listingsByUnitId }: { property: P
 }
 
 function NewUnitForm({ propertyId, onDone }: { propertyId: string; onDone: () => void }) {
-  const [form, setForm] = useState({ unit_label: "", bedrooms: 1, bathrooms: 1, rent_amount: 0 });
+  const [form, setForm] = useState({
+    unit_label: "", bedrooms: 1, bathrooms: 1, rent_amount: 0,
+    master_bedrooms: 0, meter_type: "", water_source: "",
+    has_fence: false, has_security_gate: false, has_balcony: false, has_parking: false,
+  });
   const [error, setError] = useState("");
+  const [showAmenities, setShowAmenities] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     try {
-      await api.post(`/properties/${propertyId}/units`, form);
+      await api.post(`/properties/${propertyId}/units`, {
+        ...form,
+        meter_type: form.meter_type || undefined,
+        water_source: form.water_source || undefined,
+      });
       onDone();
     } catch {
       setError("Could not create unit.");
@@ -290,13 +299,45 @@ function NewUnitForm({ propertyId, onDone }: { propertyId: string; onDone: () =>
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mb-4 grid grid-cols-2 gap-3 rounded-xl bg-ink-50 p-4 sm:grid-cols-5">
-      <input required placeholder="Label (e.g. A1)" className="input" value={form.unit_label} onChange={(e) => setForm({ ...form, unit_label: e.target.value })} />
-      <input type="number" min={0} placeholder="Beds" className="input" value={form.bedrooms} onChange={(e) => setForm({ ...form, bedrooms: Number(e.target.value) })} />
-      <input type="number" min={0} placeholder="Baths" className="input" value={form.bathrooms} onChange={(e) => setForm({ ...form, bathrooms: Number(e.target.value) })} />
-      <input type="number" min={0} placeholder="Rent (TZS/mo)" className="input" value={form.rent_amount || ""} onChange={(e) => setForm({ ...form, rent_amount: Number(e.target.value) })} />
-      <button type="submit" className="btn-primary !py-2">Add</button>
-      {error && <p className="col-span-full text-sm text-red-600">{error}</p>}
+    <form onSubmit={handleSubmit} className="mb-4 space-y-3 rounded-xl bg-ink-50 p-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <input required placeholder="Label (e.g. A1)" className="input" value={form.unit_label} onChange={(e) => setForm({ ...form, unit_label: e.target.value })} />
+        <input type="number" min={0} placeholder="Beds" className="input" value={form.bedrooms} onChange={(e) => setForm({ ...form, bedrooms: Number(e.target.value) })} />
+        <input type="number" min={0} placeholder="Baths" className="input" value={form.bathrooms} onChange={(e) => setForm({ ...form, bathrooms: Number(e.target.value) })} />
+        <input type="number" min={0} placeholder="Rent (TZS/mo)" className="input" value={form.rent_amount || ""} onChange={(e) => setForm({ ...form, rent_amount: Number(e.target.value) })} />
+        <input type="number" min={0} placeholder="Master beds" className="input" value={form.master_bedrooms} onChange={(e) => setForm({ ...form, master_bedrooms: Number(e.target.value) })} />
+      </div>
+      <button type="button" className="text-xs font-semibold text-brand-600 hover:text-brand-700" onClick={() => setShowAmenities(!showAmenities)}>
+        {showAmenities ? "Hide amenities" : "Add amenities (electricity, water, parking...)"}
+      </button>
+      {showAmenities && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div>
+            <label className="label">Electricity</label>
+            <select className="input" value={form.meter_type} onChange={(e) => setForm({ ...form, meter_type: e.target.value })}>
+              <option value="">Not specified</option>
+              <option value="LUKU">LUKU (prepaid)</option>
+              <option value="shared">Shared meter</option>
+              <option value="prepaid">Other prepaid</option>
+            </select>
+          </div>
+          <div>
+            <label className="label">Water</label>
+            <select className="input" value={form.water_source} onChange={(e) => setForm({ ...form, water_source: e.target.value })}>
+              <option value="">Not specified</option>
+              <option value="DAWASA">DAWASA</option>
+              <option value="borehole">Borehole</option>
+              <option value="well">Well</option>
+            </select>
+          </div>
+          <label className="flex items-center gap-2 text-sm text-ink-700"><input type="checkbox" checked={form.has_fence} onChange={(e) => setForm({ ...form, has_fence: e.target.checked })} /> Fenced compound</label>
+          <label className="flex items-center gap-2 text-sm text-ink-700"><input type="checkbox" checked={form.has_security_gate} onChange={(e) => setForm({ ...form, has_security_gate: e.target.checked })} /> Security gate</label>
+          <label className="flex items-center gap-2 text-sm text-ink-700"><input type="checkbox" checked={form.has_balcony} onChange={(e) => setForm({ ...form, has_balcony: e.target.checked })} /> Balcony</label>
+          <label className="flex items-center gap-2 text-sm text-ink-700"><input type="checkbox" checked={form.has_parking} onChange={(e) => setForm({ ...form, has_parking: e.target.checked })} /> Paved parking</label>
+        </div>
+      )}
+      <button type="submit" className="btn-primary !py-2">Add unit</button>
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </form>
   );
 }
@@ -321,14 +362,32 @@ function UnitRow({ unit, propertyId, landlordPhone, onListed, listing }: { unit:
     }
   }
 
+  const amenities: string[] = [];
+  if (unit.meter_type) amenities.push(unit.meter_type);
+  if (unit.water_source) amenities.push(unit.water_source);
+  if (unit.has_balcony) amenities.push("Balcony");
+  if (unit.has_fence) amenities.push("Fenced");
+  if (unit.has_security_gate) amenities.push("Gate");
+  if (unit.has_parking) amenities.push("Parking");
+  if (unit.master_bedrooms > 0) amenities.push(`${unit.master_bedrooms} master`);
+
+  const statusColor = unit.status === "occupied" ? "bg-brand-50 text-brand-700"
+    : unit.status === "under_renovation" ? "bg-red-50 text-red-700"
+    : "bg-sun-50 text-sun-700";
+
   return (
     <tr>
-      <td className="py-2 font-medium text-ink-800">{unit.unit_label}</td>
+      <td className="py-2 font-medium text-ink-800">
+        {unit.unit_label}
+        {amenities.length > 0 && (
+          <span className="ml-2 text-xs text-ink-400">{amenities.join(" · ")}</span>
+        )}
+      </td>
       <td className="py-2 text-ink-500">{unit.bedrooms}bd / {unit.bathrooms}ba</td>
       <td className="py-2 text-ink-500">{formatTZS(unit.rent_amount)}</td>
       <td className="py-2">
-        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${unit.status === "occupied" ? "bg-brand-50 text-brand-700" : "bg-sun-50 text-sun-700"}`}>
-          {unit.status}
+        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColor}`}>
+          {unit.status === "under_renovation" ? "renovating" : unit.status}
         </span>
       </td>
       <td className="py-2"><ViewCountBadge listing={listing} /></td>

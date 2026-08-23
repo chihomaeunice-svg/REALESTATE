@@ -43,6 +43,7 @@ func NewRouter(db *pgxpool.Pool, jwtSecret, resendAPIKey string) http.Handler {
 	adminH := &handlers.AdminHandler{DB: db}
 	subH := &handlers.SubscriptionHandler{DB: db}
 	favH := &handlers.FavoriteHandler{DB: db}
+	maintH := &handlers.MaintenanceHandler{DB: db}
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
@@ -97,6 +98,8 @@ func NewRouter(db *pgxpool.Pool, jwtSecret, resendAPIKey string) http.Handler {
 				r.Get("/reports/summary", reportH.Summary)
 				r.Get("/reports/by-building", reportH.ByBuilding)
 				r.Get("/subscription", subH.GetMine)
+				r.Get("/maintenance-requests", maintH.ListForLandlord)
+				r.Patch("/maintenance-requests/{id}", maintH.UpdateStatus)
 			})
 
 			// Tenant: Layer 3 portal
@@ -105,6 +108,8 @@ func NewRouter(db *pgxpool.Pool, jwtSecret, resendAPIKey string) http.Handler {
 				r.Get("/tenant/me", tenantH.GetForTenantUser)
 				r.Post("/tenant/profile", tenantH.UpsertMyProfile)
 				r.Get("/tenant/leases", leaseH.ListForTenant)
+				r.Post("/tenant/maintenance-requests", maintH.CreateForTenant)
+				r.Get("/tenant/maintenance-requests", maintH.ListForTenant)
 			})
 
 			// Shared lease-scoped resources (ownership enforced inside handlers)

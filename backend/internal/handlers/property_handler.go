@@ -28,6 +28,9 @@ type propertyRequest struct {
 	Longitude       *float64 `json:"longitude"`
 	LandSizeAcres   *float64 `json:"land_size_acres"`
 	TitleDeedStatus *string  `json:"title_deed_status"`
+	HasFence        bool     `json:"has_fence"`
+	HasSecurityGate bool     `json:"has_security_gate"`
+	HasParking      bool     `json:"has_parking"`
 }
 
 func (h *PropertyHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -48,11 +51,11 @@ func (h *PropertyHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var p models.Property
 	err := h.DB.QueryRow(context.Background(), `
-		INSERT INTO properties (owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, land_size_acres, title_deed_status, verification)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'pending')
-		RETURNING id, owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, land_size_acres, title_deed_status, verification, created_at
-	`, ownerID, req.Title, req.Description, req.PropertyType, req.District, req.Ward, req.AddressLine, city, req.Latitude, req.Longitude, req.LandSizeAcres, req.TitleDeedStatus).Scan(
-		&p.ID, &p.OwnerID, &p.Title, &p.Description, &p.PropertyType, &p.District, &p.Ward, &p.AddressLine, &p.City, &p.Latitude, &p.Longitude, &p.LandSizeAcres, &p.TitleDeedStatus, &p.Verification, &p.CreatedAt,
+		INSERT INTO properties (owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, land_size_acres, title_deed_status, has_fence, has_security_gate, has_parking, verification)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'pending')
+		RETURNING id, owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, land_size_acres, title_deed_status, has_fence, has_security_gate, has_parking, verification, created_at
+	`, ownerID, req.Title, req.Description, req.PropertyType, req.District, req.Ward, req.AddressLine, city, req.Latitude, req.Longitude, req.LandSizeAcres, req.TitleDeedStatus, req.HasFence, req.HasSecurityGate, req.HasParking).Scan(
+		&p.ID, &p.OwnerID, &p.Title, &p.Description, &p.PropertyType, &p.District, &p.Ward, &p.AddressLine, &p.City, &p.Latitude, &p.Longitude, &p.LandSizeAcres, &p.TitleDeedStatus, &p.HasFence, &p.HasSecurityGate, &p.HasParking, &p.Verification, &p.CreatedAt,
 	)
 	if err != nil {
 		httpx.Error(w, http.StatusInternalServerError, "could not create property: "+err.Error())
@@ -61,11 +64,11 @@ func (h *PropertyHandler) Create(w http.ResponseWriter, r *http.Request) {
 	httpx.JSON(w, http.StatusCreated, p)
 }
 
-const propertySelectFields = `id, owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, land_size_acres, title_deed_status, verification, created_at`
+const propertySelectFields = `id, owner_id, title, description, property_type, district, ward, address_line, city, latitude, longitude, land_size_acres, title_deed_status, has_fence, has_security_gate, has_parking, verification, created_at`
 
 func scanProperty(row interface{ Scan(dest ...any) error }) (models.Property, error) {
 	var p models.Property
-	err := row.Scan(&p.ID, &p.OwnerID, &p.Title, &p.Description, &p.PropertyType, &p.District, &p.Ward, &p.AddressLine, &p.City, &p.Latitude, &p.Longitude, &p.LandSizeAcres, &p.TitleDeedStatus, &p.Verification, &p.CreatedAt)
+	err := row.Scan(&p.ID, &p.OwnerID, &p.Title, &p.Description, &p.PropertyType, &p.District, &p.Ward, &p.AddressLine, &p.City, &p.Latitude, &p.Longitude, &p.LandSizeAcres, &p.TitleDeedStatus, &p.HasFence, &p.HasSecurityGate, &p.HasParking, &p.Verification, &p.CreatedAt)
 	return p, err
 }
 
@@ -106,11 +109,18 @@ func (h *PropertyHandler) Get(w http.ResponseWriter, r *http.Request) {
 // --- Units nested under a property ---
 
 type unitRequest struct {
-	UnitLabel  string   `json:"unit_label"`
-	Bedrooms   int      `json:"bedrooms"`
-	Bathrooms  int      `json:"bathrooms"`
-	SizeSqm    *float64 `json:"size_sqm"`
-	RentAmount float64  `json:"rent_amount"`
+	UnitLabel       string   `json:"unit_label"`
+	Bedrooms        int      `json:"bedrooms"`
+	Bathrooms       int      `json:"bathrooms"`
+	SizeSqm         *float64 `json:"size_sqm"`
+	RentAmount      float64  `json:"rent_amount"`
+	MeterType       *string  `json:"meter_type"`
+	WaterSource     *string  `json:"water_source"`
+	HasFence        bool     `json:"has_fence"`
+	HasSecurityGate bool     `json:"has_security_gate"`
+	HasBalcony      bool     `json:"has_balcony"`
+	MasterBedrooms  int      `json:"master_bedrooms"`
+	HasParking      bool     `json:"has_parking"`
 }
 
 func (h *PropertyHandler) CreateUnit(w http.ResponseWriter, r *http.Request) {
@@ -127,11 +137,14 @@ func (h *PropertyHandler) CreateUnit(w http.ResponseWriter, r *http.Request) {
 
 	var u models.Unit
 	err := h.DB.QueryRow(context.Background(), `
-		INSERT INTO units (property_id, unit_label, bedrooms, bathrooms, size_sqm, rent_amount)
-		VALUES ($1,$2,$3,$4,$5,$6)
-		RETURNING id, property_id, unit_label, bedrooms, bathrooms, size_sqm, rent_amount, status, created_at
-	`, propertyID, req.UnitLabel, req.Bedrooms, req.Bathrooms, req.SizeSqm, req.RentAmount).Scan(
-		&u.ID, &u.PropertyID, &u.UnitLabel, &u.Bedrooms, &u.Bathrooms, &u.SizeSqm, &u.RentAmount, &u.Status, &u.CreatedAt,
+		INSERT INTO units (property_id, unit_label, bedrooms, bathrooms, size_sqm, rent_amount, meter_type, water_source, has_fence, has_security_gate, has_balcony, master_bedrooms, has_parking)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		RETURNING id, property_id, unit_label, bedrooms, bathrooms, size_sqm, rent_amount, status,
+		          meter_type, water_source, has_fence, has_security_gate, has_balcony, master_bedrooms, has_parking, created_at
+	`, propertyID, req.UnitLabel, req.Bedrooms, req.Bathrooms, req.SizeSqm, req.RentAmount,
+		req.MeterType, req.WaterSource, req.HasFence, req.HasSecurityGate, req.HasBalcony, req.MasterBedrooms, req.HasParking).Scan(
+		&u.ID, &u.PropertyID, &u.UnitLabel, &u.Bedrooms, &u.Bathrooms, &u.SizeSqm, &u.RentAmount, &u.Status,
+		&u.MeterType, &u.WaterSource, &u.HasFence, &u.HasSecurityGate, &u.HasBalcony, &u.MasterBedrooms, &u.HasParking, &u.CreatedAt,
 	)
 	if err != nil {
 		httpx.Error(w, http.StatusInternalServerError, "could not create unit: "+err.Error())
@@ -143,7 +156,8 @@ func (h *PropertyHandler) CreateUnit(w http.ResponseWriter, r *http.Request) {
 func (h *PropertyHandler) ListUnits(w http.ResponseWriter, r *http.Request) {
 	propertyID := chi.URLParam(r, "id")
 	rows, err := h.DB.Query(context.Background(), `
-		SELECT id, property_id, unit_label, bedrooms, bathrooms, size_sqm, rent_amount, status, created_at
+		SELECT id, property_id, unit_label, bedrooms, bathrooms, size_sqm, rent_amount, status,
+		       meter_type, water_source, has_fence, has_security_gate, has_balcony, master_bedrooms, has_parking, created_at
 		FROM units WHERE property_id=$1 ORDER BY created_at DESC
 	`, propertyID)
 	if err != nil {
@@ -155,7 +169,8 @@ func (h *PropertyHandler) ListUnits(w http.ResponseWriter, r *http.Request) {
 	units := []models.Unit{}
 	for rows.Next() {
 		var u models.Unit
-		if err := rows.Scan(&u.ID, &u.PropertyID, &u.UnitLabel, &u.Bedrooms, &u.Bathrooms, &u.SizeSqm, &u.RentAmount, &u.Status, &u.CreatedAt); err != nil {
+		if err := rows.Scan(&u.ID, &u.PropertyID, &u.UnitLabel, &u.Bedrooms, &u.Bathrooms, &u.SizeSqm, &u.RentAmount, &u.Status,
+			&u.MeterType, &u.WaterSource, &u.HasFence, &u.HasSecurityGate, &u.HasBalcony, &u.MasterBedrooms, &u.HasParking, &u.CreatedAt); err != nil {
 			continue
 		}
 		units = append(units, u)
@@ -167,8 +182,9 @@ func (h *PropertyHandler) ListUnits(w http.ResponseWriter, r *http.Request) {
 func (h *PropertyHandler) ListAllUnitsForLandlord(w http.ResponseWriter, r *http.Request) {
 	ownerID := middleware.UserID(r)
 	rows, err := h.DB.Query(context.Background(), `
-		SELECT u.id, u.property_id, u.unit_label, u.bedrooms, u.bathrooms, u.size_sqm, u.rent_amount, u.status, u.created_at,
-		       p.title
+		SELECT u.id, u.property_id, u.unit_label, u.bedrooms, u.bathrooms, u.size_sqm, u.rent_amount, u.status,
+		       u.meter_type, u.water_source, u.has_fence, u.has_security_gate, u.has_balcony, u.master_bedrooms, u.has_parking,
+		       u.created_at, p.title
 		FROM units u JOIN properties p ON p.id = u.property_id
 		WHERE p.owner_id=$1 ORDER BY u.created_at DESC
 	`, ownerID)
@@ -185,7 +201,9 @@ func (h *PropertyHandler) ListAllUnitsForLandlord(w http.ResponseWriter, r *http
 	units := []unitWithProperty{}
 	for rows.Next() {
 		var u unitWithProperty
-		if err := rows.Scan(&u.ID, &u.PropertyID, &u.UnitLabel, &u.Bedrooms, &u.Bathrooms, &u.SizeSqm, &u.RentAmount, &u.Status, &u.CreatedAt, &u.PropertyTitle); err != nil {
+		if err := rows.Scan(&u.ID, &u.PropertyID, &u.UnitLabel, &u.Bedrooms, &u.Bathrooms, &u.SizeSqm, &u.RentAmount, &u.Status,
+			&u.MeterType, &u.WaterSource, &u.HasFence, &u.HasSecurityGate, &u.HasBalcony, &u.MasterBedrooms, &u.HasParking,
+			&u.CreatedAt, &u.PropertyTitle); err != nil {
 			continue
 		}
 		units = append(units, u)

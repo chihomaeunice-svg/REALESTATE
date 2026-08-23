@@ -12,7 +12,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { api } from "../../lib/api";
-import type { Lease, PaymentSchedule, Payment } from "../../lib/types";
+import type { Lease, PaymentSchedule, Payment, MaintenanceRequest } from "../../lib/types";
 import { formatTZS, formatDate, formatDateTime } from "../../lib/format";
 import { ScheduleList } from "../../components/ScheduleList";
 import { PaymentHistoryList } from "../../components/PaymentHistoryList";
@@ -30,6 +30,8 @@ export function TenantPortalScreen() {
   const [paying, setPaying] = useState<PaymentSchedule | null>(null);
   const [signing, setSigning] = useState(false);
   const [signatureName, setSignatureName] = useState(user?.full_name ?? "");
+  const [maintRequests, setMaintRequests] = useState<MaintenanceRequest[]>([]);
+  const [showMaintForm, setShowMaintForm] = useState(false);
 
   function loadLeases() {
     api.get<Lease[]>("/tenant/leases").then((data) => {
@@ -37,7 +39,11 @@ export function TenantPortalScreen() {
       if (data.length > 0 && !activeLeaseId) setActiveLeaseId(data[0].id);
     });
   }
+  function loadMaintRequests() {
+    api.get<MaintenanceRequest[]>("/tenant/maintenance-requests").then(setMaintRequests).catch(() => {});
+  }
   useEffect(loadLeases, []);
+  useEffect(loadMaintRequests, []);
 
   function loadDetail(leaseId: string) {
     api.get<PaymentSchedule[]>(`/leases/${leaseId}/schedules`).then(setSchedules);
@@ -171,6 +177,64 @@ export function TenantPortalScreen() {
             <Text style={styles.sectionTitle}>Payment history</Text>
             <PaymentHistoryList payments={payments} />
           </View>
+
+          <View style={styles.section}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Feather name="tool" size={18} color={colors.ink[400]} />
+                <Text style={styles.sectionTitle}>Maintenance requests</Text>
+              </View>
+              <TouchableOpacity
+                style={{ flexDirection: "row", alignItems: "center", gap: 4, borderWidth: 1, borderColor: colors.ink[200], borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: colors.white }}
+                onPress={() => setShowMaintForm(!showMaintForm)}
+              >
+                <Feather name="plus" size={12} color={colors.brand[600]} />
+                <Text style={{ fontSize: 12, fontWeight: "600", color: colors.brand[600] }}>New request</Text>
+              </TouchableOpacity>
+            </View>
+
+            {showMaintForm && (
+              <MaintenanceForm
+                unitId={lease.unit_id}
+                onDone={() => { setShowMaintForm(false); loadMaintRequests(); }}
+                onCancel={() => setShowMaintForm(false)}
+              />
+            )}
+
+            {maintRequests.length === 0 ? (
+              <Text style={{ fontSize: 13, color: colors.ink[400] }}>No maintenance requests yet.</Text>
+            ) : (
+              maintRequests.map((mr) => (
+                <View key={mr.id} style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: colors.ink[50], borderRadius: 12, padding: 12, marginBottom: 8 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 14, fontWeight: "600", color: colors.ink[800] }}>{mr.title}</Text>
+                    {mr.description ? <Text style={{ fontSize: 12, color: colors.ink[500], marginTop: 2 }}>{mr.description}</Text> : null}
+                    <Text style={{ fontSize: 11, color: colors.ink[400], marginTop: 2 }}>{mr.unit_label} · {mr.property_title}</Text>
+                  </View>
+                  <View style={{ alignItems: "flex-end", gap: 4 }}>
+                    <View style={{
+                      paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10,
+                      backgroundColor: mr.status === "open" ? colors.sun[50] : mr.status === "in_progress" ? colors.brand[50] : mr.status === "completed" ? "#DCFCE7" : colors.ink[100],
+                    }}>
+                      <Text style={{
+                        fontSize: 11, fontWeight: "600",
+                        color: mr.status === "open" ? colors.sun[700] : mr.status === "in_progress" ? colors.brand[700] : mr.status === "completed" ? "#15803D" : colors.ink[500],
+                      }}>{mr.status.replace("_", " ")}</Text>
+                    </View>
+                    <View style={{
+                      paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10,
+                      backgroundColor: mr.priority === "urgent" || mr.priority === "high" ? "#FEF2F2" : colors.ink[100],
+                    }}>
+                      <Text style={{
+                        fontSize: 11, fontWeight: "600",
+                        color: mr.priority === "urgent" || mr.priority === "high" ? "#B91C1C" : colors.ink[500],
+                      }}>{mr.priority}</Text>
+                    </View>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
         </>
       )}
 
@@ -282,6 +346,78 @@ function PayModal({
         </View>
       </View>
     </Modal>
+  );
+}
+
+function MaintenanceForm({ unitId, onDone, onCancel }: { unitId: string; onDone: () => void; onCancel: () => void }) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState("medium");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit() {
+    setSubmitting(true);
+    setError("");
+    try {
+      await api.post("/tenant/maintenance-requests", {
+        unit_id: unitId,
+        title,
+        description: description || undefined,
+        priority,
+      });
+      onDone();
+    } catch {
+      setError("Could not submit request.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <View style={{ backgroundColor: colors.ink[50], borderRadius: 12, padding: 12, marginBottom: 12 }}>
+      <View style={{ marginBottom: 8 }}>
+        <Text style={styles.label}>Issue title</Text>
+        <TextInput style={styles.input} placeholder="e.g. Broken pipe in bathroom" value={title} onChangeText={setTitle} />
+      </View>
+      <View style={{ marginBottom: 8 }}>
+        <Text style={styles.label}>Priority</Text>
+        <View style={{ flexDirection: "row", gap: 6 }}>
+          {["low", "medium", "high", "urgent"].map((p) => (
+            <TouchableOpacity
+              key={p}
+              onPress={() => setPriority(p)}
+              style={{
+                paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8,
+                borderWidth: 1, borderColor: priority === p ? colors.brand[500] : colors.ink[200],
+                backgroundColor: priority === p ? colors.brand[50] : colors.white,
+              }}
+            >
+              <Text style={{ fontSize: 12, color: priority === p ? colors.brand[700] : colors.ink[600], fontWeight: priority === p ? "500" : "400" }}>{p}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+      <View style={{ marginBottom: 8 }}>
+        <Text style={styles.label}>Description (optional)</Text>
+        <TextInput
+          style={[styles.input, { height: 70, textAlignVertical: "top" }]}
+          multiline
+          placeholder="Describe the issue..."
+          value={description}
+          onChangeText={setDescription}
+        />
+      </View>
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      <View style={{ flexDirection: "row", gap: 8 }}>
+        <TouchableOpacity style={[styles.submitBtn, { flex: 1 }, submitting && styles.disabledBtn]} onPress={handleSubmit} disabled={submitting || !title}>
+          <Text style={styles.submitBtnText}>{submitting ? "Submitting..." : "Submit request"}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
+          <Text style={styles.cancelBtnText}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 

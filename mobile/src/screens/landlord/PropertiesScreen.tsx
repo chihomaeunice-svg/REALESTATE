@@ -245,6 +245,14 @@ function UnitsPanel({ property, landlordPhone, listingsByUnitId }: { property: P
   const [beds, setBeds] = useState("1");
   const [baths, setBaths] = useState("1");
   const [rent, setRent] = useState("");
+  const [masterBeds, setMasterBeds] = useState("0");
+  const [meterType, setMeterType] = useState("");
+  const [waterSource, setWaterSource] = useState("");
+  const [hasFence, setHasFence] = useState(false);
+  const [hasGate, setHasGate] = useState(false);
+  const [hasBalcony, setHasBalcony] = useState(false);
+  const [hasParking, setHasParking] = useState(false);
+  const [showAmenities, setShowAmenities] = useState(false);
   const [error, setError] = useState("");
 
   function loadUnits() {
@@ -257,9 +265,14 @@ function UnitsPanel({ property, landlordPhone, listingsByUnitId }: { property: P
     try {
       await api.post(`/properties/${property.id}/units`, {
         unit_label: unitLabel, bedrooms: Number(beds), bathrooms: Number(baths), rent_amount: Number(rent),
+        master_bedrooms: Number(masterBeds),
+        meter_type: meterType || undefined, water_source: waterSource || undefined,
+        has_fence: hasFence, has_security_gate: hasGate, has_balcony: hasBalcony, has_parking: hasParking,
       });
       setShowForm(false);
       setUnitLabel(""); setBeds("1"); setBaths("1"); setRent("");
+      setMasterBeds("0"); setMeterType(""); setWaterSource("");
+      setHasFence(false); setHasGate(false); setHasBalcony(false); setHasParking(false);
       loadUnits();
     } catch { setError("Could not create unit."); }
   }
@@ -287,13 +300,55 @@ function UnitsPanel({ property, landlordPhone, listingsByUnitId }: { property: P
       </View>
 
       {showForm && (
-        <View style={styles.unitFormRow}>
-          <TextInput style={[styles.input, { flex: 1 }]} placeholder="Label (A1)" value={unitLabel} onChangeText={setUnitLabel} />
-          <TextInput style={[styles.input, { width: 50 }]} keyboardType="number-pad" placeholder="Beds" value={beds} onChangeText={setBeds} />
-          <TextInput style={[styles.input, { width: 50 }]} keyboardType="number-pad" placeholder="Baths" value={baths} onChangeText={setBaths} />
-          <TextInput style={[styles.input, { flex: 1 }]} keyboardType="number-pad" placeholder="Rent" value={rent} onChangeText={setRent} />
-          <TouchableOpacity style={styles.submitBtn} onPress={addUnit}>
-            <Text style={styles.submitBtnText}>Add</Text>
+        <View style={{ marginBottom: 10 }}>
+          <View style={styles.unitFormRow}>
+            <TextInput style={[styles.input, { flex: 1 }]} placeholder="Label (A1)" value={unitLabel} onChangeText={setUnitLabel} />
+            <TextInput style={[styles.input, { width: 50 }]} keyboardType="number-pad" placeholder="Beds" value={beds} onChangeText={setBeds} />
+            <TextInput style={[styles.input, { width: 50 }]} keyboardType="number-pad" placeholder="Baths" value={baths} onChangeText={setBaths} />
+            <TextInput style={[styles.input, { flex: 1 }]} keyboardType="number-pad" placeholder="Rent" value={rent} onChangeText={setRent} />
+          </View>
+          <View style={[styles.unitFormRow, { marginTop: 6 }]}>
+            <TextInput style={[styles.input, { width: 60 }]} keyboardType="number-pad" placeholder="Master" value={masterBeds} onChangeText={setMasterBeds} />
+            <TouchableOpacity onPress={() => setShowAmenities(!showAmenities)}>
+              <Text style={{ fontSize: 12, fontWeight: "600", color: colors.brand[600], paddingVertical: 10 }}>
+                {showAmenities ? "Hide amenities" : "+ Amenities"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {showAmenities && (
+            <View style={{ marginTop: 6, gap: 6 }}>
+              <View style={styles.unitFormRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.label}>Electricity</Text>
+                  <View style={styles.pickerWrap}>
+                    {["", "LUKU", "shared"].map((v) => (
+                      <TouchableOpacity key={v} style={[styles.typeChip, meterType === v && styles.typeChipActive]} onPress={() => setMeterType(v)}>
+                        <Text style={[styles.typeChipText, meterType === v && styles.typeChipTextActive]}>{v || "N/A"}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.label}>Water</Text>
+                  <View style={styles.pickerWrap}>
+                    {["", "DAWASA", "borehole"].map((v) => (
+                      <TouchableOpacity key={v} style={[styles.typeChip, waterSource === v && styles.typeChipActive]} onPress={() => setWaterSource(v)}>
+                        <Text style={[styles.typeChipText, waterSource === v && styles.typeChipTextActive]}>{v || "N/A"}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </View>
+              <View style={[styles.unitFormRow, { gap: 12 }]}>
+                <CheckItem label="Fenced" value={hasFence} onToggle={() => setHasFence(!hasFence)} />
+                <CheckItem label="Gate" value={hasGate} onToggle={() => setHasGate(!hasGate)} />
+                <CheckItem label="Balcony" value={hasBalcony} onToggle={() => setHasBalcony(!hasBalcony)} />
+                <CheckItem label="Parking" value={hasParking} onToggle={() => setHasParking(!hasParking)} />
+              </View>
+            </View>
+          )}
+          <TouchableOpacity style={[styles.submitBtn, { marginTop: 8 }]} onPress={addUnit}>
+            <Text style={styles.submitBtnText}>Add unit</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -304,16 +359,29 @@ function UnitsPanel({ property, landlordPhone, listingsByUnitId }: { property: P
       ) : (
         units.map((u) => {
           const listing = listingsByUnitId.get(u.id);
+          const amenities: string[] = [];
+          if (u.meter_type) amenities.push(u.meter_type);
+          if (u.water_source) amenities.push(u.water_source);
+          if (u.has_balcony) amenities.push("Balcony");
+          if (u.has_fence) amenities.push("Fenced");
+          if (u.has_security_gate) amenities.push("Gate");
+          if (u.has_parking) amenities.push("Parking");
+          if (u.master_bedrooms > 0) amenities.push(`${u.master_bedrooms} master`);
+
+          const isRenovating = u.status === "under_renovation";
           return (
             <View key={u.id} style={styles.unitRow}>
               <View style={styles.unitLeft}>
                 <Text style={styles.unitLabel}>{u.unit_label}</Text>
                 <Text style={styles.unitMeta}>{u.bedrooms}bd / {u.bathrooms}ba · {formatTZS(u.rent_amount)}</Text>
+                {amenities.length > 0 && (
+                  <Text style={{ fontSize: 11, color: colors.ink[400], marginTop: 2 }}>{amenities.join(" · ")}</Text>
+                )}
               </View>
               <View style={styles.unitRight}>
-                <View style={[styles.statusBadge, u.status === "occupied" ? styles.occupiedBadge : styles.vacantBadge]}>
-                  <Text style={[styles.statusText, u.status === "occupied" ? styles.occupiedText : styles.vacantText]}>
-                    {u.status}
+                <View style={[styles.statusBadge, u.status === "occupied" ? styles.occupiedBadge : isRenovating ? styles.renovatingBadge : styles.vacantBadge]}>
+                  <Text style={[styles.statusText, u.status === "occupied" ? styles.occupiedText : isRenovating ? styles.renovatingText : styles.vacantText]}>
+                    {isRenovating ? "renovating" : u.status}
                   </Text>
                 </View>
                 {listing && (
@@ -330,6 +398,15 @@ function UnitsPanel({ property, landlordPhone, listingsByUnitId }: { property: P
         })
       )}
     </View>
+  );
+}
+
+function CheckItem({ label, value, onToggle }: { label: string; value: boolean; onToggle: () => void }) {
+  return (
+    <TouchableOpacity onPress={onToggle} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+      <Feather name={value ? "check-square" : "square"} size={16} color={value ? colors.brand[600] : colors.ink[300]} />
+      <Text style={{ fontSize: 12, color: colors.ink[700] }}>{label}</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -385,6 +462,8 @@ const styles = StyleSheet.create({
   occupiedText: { color: colors.brand[700] },
   vacantBadge: { backgroundColor: colors.sun[50] },
   vacantText: { color: colors.sun[700] },
+  renovatingBadge: { backgroundColor: "#FEF2F2" },
+  renovatingText: { color: "#B91C1C" },
   viewCount: { fontSize: 11, color: colors.ink[400] },
   publishLink: { fontSize: 12, fontWeight: "600", color: colors.brand[600] },
   formCard: {
