@@ -115,6 +115,10 @@ func (h *ListingHandler) Browse(w http.ResponseWriter, r *http.Request) {
 		SELECT ` + listingSelectFields + `
 		FROM listings l JOIN properties p ON p.id = l.property_id LEFT JOIN units u ON u.id = l.unit_id
 		WHERE l.status = 'active'
+		  AND NOT EXISTS (
+			SELECT 1 FROM subscriptions s
+			WHERE s.landlord_id = p.owner_id AND s.status = 'expired'
+		  )
 	`
 	args := []interface{}{}
 	argN := 1

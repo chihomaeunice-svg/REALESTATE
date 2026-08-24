@@ -40,7 +40,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     } catch {
       // ignore body parse failure
     }
-    throw new ApiError(res.status, message);
+    const error = new ApiError(res.status, message);
+    if (res.status === 402) {
+      // Subscription expired — caller can check error.status === 402
+    }
+    throw error;
   }
   if (res.status === 204) return undefined as T;
   const contentType = res.headers.get("content-type") || "";

@@ -169,13 +169,41 @@ export interface BuildingIncome {
   units: number;
 }
 
+export type SubscriptionStatus = "trial" | "active" | "grace" | "expired";
+
 export interface Subscription {
   id: string;
   landlord_id: string;
-  tier: "free" | "starter" | "growth" | "scale";
+  tier: "free" | "starter" | "growth" | "professional" | "enterprise";
   unit_count: number;
   price_tzs: number;
+  status: SubscriptionStatus;
+  trial_ends_at?: string;
+  current_period_start?: string;
+  current_period_end?: string;
+  grace_ends_at?: string;
+  last_grace_email_day: number;
   created_at: string;
+}
+
+export interface SubscriptionPayment {
+  id: string;
+  subscription_id: string;
+  snippe_reference?: string;
+  amount: number;
+  currency: string;
+  phone_number: string;
+  status: "pending" | "completed" | "failed";
+  idempotency_key: string;
+  period_start: string;
+  period_end: string;
+  paid_at?: string;
+  created_at: string;
+}
+
+export interface SubscriptionResponse {
+  subscription: Subscription;
+  payments: SubscriptionPayment[];
 }
 
 export interface MaintenanceRequest {

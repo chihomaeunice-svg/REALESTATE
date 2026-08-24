@@ -156,12 +156,33 @@ type Payment struct {
 }
 
 type Subscription struct {
-	ID         string    `json:"id"`
-	LandlordID string    `json:"landlord_id"`
-	Tier       string    `json:"tier"`
-	UnitCount  int       `json:"unit_count"`
-	PriceTZS   float64   `json:"price_tzs"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID                 string     `json:"id"`
+	LandlordID         string     `json:"landlord_id"`
+	Tier               string     `json:"tier"`
+	UnitCount          int        `json:"unit_count"`
+	PriceTZS           float64    `json:"price_tzs"`
+	Status             string     `json:"status"`
+	TrialEndsAt        *time.Time `json:"trial_ends_at,omitempty"`
+	CurrentPeriodStart *time.Time `json:"current_period_start,omitempty"`
+	CurrentPeriodEnd   *time.Time `json:"current_period_end,omitempty"`
+	GraceEndsAt        *time.Time `json:"grace_ends_at,omitempty"`
+	LastGraceEmailDay  int        `json:"last_grace_email_day"`
+	CreatedAt          time.Time  `json:"created_at"`
+}
+
+type SubscriptionPayment struct {
+	ID              string     `json:"id"`
+	SubscriptionID  string     `json:"subscription_id"`
+	SnippeReference *string    `json:"snippe_reference,omitempty"`
+	Amount          float64    `json:"amount"`
+	Currency        string     `json:"currency"`
+	PhoneNumber     string     `json:"phone_number"`
+	Status          string     `json:"status"`
+	IdempotencyKey  string     `json:"idempotency_key"`
+	PeriodStart     time.Time  `json:"period_start"`
+	PeriodEnd       time.Time  `json:"period_end"`
+	PaidAt          *time.Time `json:"paid_at,omitempty"`
+	CreatedAt       time.Time  `json:"created_at"`
 }
 
 type MaintenanceRequest struct {
