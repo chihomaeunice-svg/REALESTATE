@@ -8,13 +8,15 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"realestate-backend/internal/config"
 	"realestate-backend/internal/email"
 	"realestate-backend/internal/handlers"
 	"realestate-backend/internal/httpx"
 	appmw "realestate-backend/internal/middleware"
+	"realestate-backend/internal/payment"
 )
 
-func NewRouter(db *pgxpool.Pool, jwtSecret, resendAPIKey string) http.Handler {
+func NewRouter(db *pgxpool.Pool, cfg config.Config) http.Handler {
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
@@ -28,11 +30,19 @@ func NewRouter(db *pgxpool.Pool, jwtSecret, resendAPIKey string) http.Handler {
 	}))
 
 	var emailClient *email.Client
-	if resendAPIKey != "" {
-		emailClient = email.NewClient(resendAPIKey)
+	if cfg.ResendAPIKey != "" {
+		emailClient = email.NewClient(cfg.ResendAPIKey)
 	}
 
-	authH := &handlers.AuthHandler{DB: db, JWTSecret: jwtSecret, Email: emailClient}
+	var snippeClient *payment.SnippeClient
+	if cfg.SnippeAPIKey != "" {
+		snippeClient = &payment.SnippeClient{
+			APIKey:     cfg.SnippeAPIKey,
+			WebhookKey: cfg.SnippeWebhookKey,
+		}
+	}
+
+	authH := &handlers.AuthHandler{DB: db, JWTSecret: cfg.JWTSecret, Email: emailClient}
 	propH := &handlers.PropertyHandler{DB: db}
 	listH := &handlers.ListingHandler{DB: db}
 	uploadH := &handlers.UploadHandler{}
@@ -41,8 +51,10 @@ func NewRouter(db *pgxpool.Pool, jwtSecret, resendAPIKey string) http.Handler {
 	payH := &handlers.PaymentHandler{DB: db}
 	reportH := &handlers.ReportHandler{DB: db}
 	adminH := &handlers.AdminHandler{DB: db}
-	subH := &handlers.SubscriptionHandler{DB: db}
+	subH := &handlers.SubscriptionHandler{DB: db, Snippe: snippeClient, Email: emailClient, BaseURL: cfg.BaseURL}
 	favH := &handlers.FavoriteHandler{DB: db}
+	maintH := &handlers.MaintenanceHandler{DB: db}
+	webhookH := &handlers.WebhookHandler{DB: db, Snippe: snippeClient, Email: emailClient}
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
@@ -60,6 +72,8 @@ func NewRouter(db *pgxpool.Pool, jwtSecret, resendAPIKey string) http.Handler {
 		r.Post("/auth/login", authH.Login)
 		r.Post("/auth/otp/send", authH.SendOTP)
 		r.Post("/auth/otp/verify", authH.VerifyOTP)
+		r.Post("/auth/forgot-password", authH.ForgotPassword)
+		r.Post("/auth/reset-password", authH.ResetPassword)
 
 		// --- Public: Layer 1 marketplace ---
 		r.Get("/listings", listH.Browse)
@@ -67,36 +81,49 @@ func NewRouter(db *pgxpool.Pool, jwtSecret, resendAPIKey string) http.Handler {
 		r.Post("/listings/{id}/inquiries", listH.CreateInquiry)
 		r.Get("/properties/{id}", propH.Get)
 
+		// --- Public: webhooks ---
+		r.Post("/webhooks/snippe", webhookH.SnippeWebhook)
+
 		// --- Authenticated ---
 		r.Group(func(r chi.Router) {
-			r.Use(appmw.Auth(jwtSecret))
+			r.Use(appmw.Auth(cfg.JWTSecret))
 
 			r.Get("/me", func(w http.ResponseWriter, r *http.Request) {
 				authH.Me(w, r, appmw.UserID(r))
 			})
 
-			// Landlord + agent: Layer 1 listing management
+			// Landlord + agent: read-only routes (always accessible)
 			r.Group(func(r chi.Router) {
 				r.Use(appmw.RequireRole("landlord", "agent"))
-				r.Post("/properties", propH.Create)
+
 				r.Get("/properties", propH.ListMine)
-				r.Post("/properties/{id}/units", propH.CreateUnit)
 				r.Get("/properties/{id}/units", propH.ListUnits)
 				r.Get("/units", propH.ListAllUnitsForLandlord)
-				r.Post("/listings", listH.Create)
-				r.Post("/uploads", uploadH.Upload)
 				r.Get("/inquiries", listH.ListInquiriesForLandlord)
-
-				// Layer 2: management suite
 				r.Get("/tenants", tenantH.ListForLandlord)
-				r.Get("/tenants/lookup", tenantH.LookupByPhone)
-				r.Post("/leases", leaseH.Create)
 				r.Get("/leases", leaseH.ListForLandlord)
-				r.Post("/payments/manual", payH.LogManual)
 				r.Get("/arrears", payH.ArrearsForLandlord)
 				r.Get("/reports/summary", reportH.Summary)
 				r.Get("/reports/by-building", reportH.ByBuilding)
 				r.Get("/subscription", subH.GetMine)
+				r.Post("/subscription/pay", subH.Pay)
+				r.Get("/subscription/payments", subH.PaymentHistory)
+				r.Get("/maintenance-requests", maintH.ListForLandlord)
+			})
+
+			// Landlord + agent: write routes (require active subscription)
+			r.Group(func(r chi.Router) {
+				r.Use(appmw.RequireRole("landlord", "agent"))
+				r.Use(appmw.RequireActiveSubscription(db))
+
+				r.Post("/properties", propH.Create)
+				r.Post("/properties/{id}/units", propH.CreateUnit)
+				r.Post("/listings", listH.Create)
+				r.Post("/uploads", uploadH.Upload)
+				r.Get("/tenants/lookup", tenantH.LookupByPhone)
+				r.Post("/leases", leaseH.Create)
+				r.Post("/payments/manual", payH.LogManual)
+				r.Patch("/maintenance-requests/{id}", maintH.UpdateStatus)
 			})
 
 			// Tenant: Layer 3 portal
@@ -105,6 +132,8 @@ func NewRouter(db *pgxpool.Pool, jwtSecret, resendAPIKey string) http.Handler {
 				r.Get("/tenant/me", tenantH.GetForTenantUser)
 				r.Post("/tenant/profile", tenantH.UpsertMyProfile)
 				r.Get("/tenant/leases", leaseH.ListForTenant)
+				r.Post("/tenant/maintenance-requests", maintH.CreateForTenant)
+				r.Get("/tenant/maintenance-requests", maintH.ListForTenant)
 			})
 
 			// Shared lease-scoped resources (ownership enforced inside handlers)

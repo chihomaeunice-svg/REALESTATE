@@ -17,33 +17,43 @@ type User struct {
 }
 
 type Property struct {
-	ID           string    `json:"id"`
-	OwnerID      string    `json:"owner_id"`
-	Title        string    `json:"title"`
-	Description  *string   `json:"description,omitempty"`
-	PropertyType string    `json:"property_type"`
-	District     string    `json:"district"`
-	Ward         string    `json:"ward"`
-	AddressLine  *string   `json:"address_line,omitempty"`
-	City         string    `json:"city"`
-	Latitude     *float64  `json:"latitude,omitempty"`
-	Longitude    *float64  `json:"longitude,omitempty"`
-	LandSizeAcres *float64 `json:"land_size_acres,omitempty"`
-	TitleDeedStatus *string `json:"title_deed_status,omitempty"`
-	Verification string    `json:"verification"`
-	CreatedAt    time.Time `json:"created_at"`
+	ID              string    `json:"id"`
+	OwnerID         string    `json:"owner_id"`
+	Title           string    `json:"title"`
+	Description     *string   `json:"description,omitempty"`
+	PropertyType    string    `json:"property_type"`
+	District        string    `json:"district"`
+	Ward            string    `json:"ward"`
+	AddressLine     *string   `json:"address_line,omitempty"`
+	City            string    `json:"city"`
+	Latitude        *float64  `json:"latitude,omitempty"`
+	Longitude       *float64  `json:"longitude,omitempty"`
+	LandSizeAcres   *float64  `json:"land_size_acres,omitempty"`
+	TitleDeedStatus *string   `json:"title_deed_status,omitempty"`
+	HasFence        bool      `json:"has_fence"`
+	HasSecurityGate bool      `json:"has_security_gate"`
+	HasParking      bool      `json:"has_parking"`
+	Verification    string    `json:"verification"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 type Unit struct {
-	ID         string    `json:"id"`
-	PropertyID string    `json:"property_id"`
-	UnitLabel  string    `json:"unit_label"`
-	Bedrooms   int       `json:"bedrooms"`
-	Bathrooms  int       `json:"bathrooms"`
-	SizeSqm    *float64  `json:"size_sqm,omitempty"`
-	RentAmount float64   `json:"rent_amount"`
-	Status     string    `json:"status"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID              string    `json:"id"`
+	PropertyID      string    `json:"property_id"`
+	UnitLabel       string    `json:"unit_label"`
+	Bedrooms        int       `json:"bedrooms"`
+	Bathrooms       int       `json:"bathrooms"`
+	SizeSqm         *float64  `json:"size_sqm,omitempty"`
+	RentAmount      float64   `json:"rent_amount"`
+	Status          string    `json:"status"`
+	MeterType       *string   `json:"meter_type,omitempty"`
+	WaterSource     *string   `json:"water_source,omitempty"`
+	HasFence        bool      `json:"has_fence"`
+	HasSecurityGate bool      `json:"has_security_gate"`
+	HasBalcony      bool      `json:"has_balcony"`
+	MasterBedrooms  int       `json:"master_bedrooms"`
+	HasParking      bool      `json:"has_parking"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 type Listing struct {
@@ -146,10 +156,47 @@ type Payment struct {
 }
 
 type Subscription struct {
-	ID         string    `json:"id"`
-	LandlordID string    `json:"landlord_id"`
-	Tier       string    `json:"tier"`
-	UnitCount  int       `json:"unit_count"`
-	PriceTZS   float64   `json:"price_tzs"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID                 string     `json:"id"`
+	LandlordID         string     `json:"landlord_id"`
+	Tier               string     `json:"tier"`
+	UnitCount          int        `json:"unit_count"`
+	PriceTZS           float64    `json:"price_tzs"`
+	Status             string     `json:"status"`
+	TrialEndsAt        *time.Time `json:"trial_ends_at,omitempty"`
+	CurrentPeriodStart *time.Time `json:"current_period_start,omitempty"`
+	CurrentPeriodEnd   *time.Time `json:"current_period_end,omitempty"`
+	GraceEndsAt        *time.Time `json:"grace_ends_at,omitempty"`
+	LastGraceEmailDay  int        `json:"last_grace_email_day"`
+	CreatedAt          time.Time  `json:"created_at"`
+}
+
+type SubscriptionPayment struct {
+	ID              string     `json:"id"`
+	SubscriptionID  string     `json:"subscription_id"`
+	SnippeReference *string    `json:"snippe_reference,omitempty"`
+	Amount          float64    `json:"amount"`
+	Currency        string     `json:"currency"`
+	PhoneNumber     string     `json:"phone_number"`
+	Status          string     `json:"status"`
+	IdempotencyKey  string     `json:"idempotency_key"`
+	PeriodStart     time.Time  `json:"period_start"`
+	PeriodEnd       time.Time  `json:"period_end"`
+	PaidAt          *time.Time `json:"paid_at,omitempty"`
+	CreatedAt       time.Time  `json:"created_at"`
+}
+
+type MaintenanceRequest struct {
+	ID           string    `json:"id"`
+	UnitID       string    `json:"unit_id"`
+	TenantUserID string    `json:"tenant_user_id"`
+	Title        string    `json:"title"`
+	Description  *string   `json:"description,omitempty"`
+	Priority     string    `json:"priority"`
+	Status       string    `json:"status"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	// Joined fields
+	UnitLabel     string `json:"unit_label,omitempty"`
+	PropertyTitle string `json:"property_title,omitempty"`
+	TenantName    string `json:"tenant_name,omitempty"`
 }

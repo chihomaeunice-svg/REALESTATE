@@ -108,6 +108,9 @@ export interface Property {
   city: string;
   land_size_acres?: number;
   title_deed_status?: string;
+  has_fence: boolean;
+  has_security_gate: boolean;
+  has_parking: boolean;
   verification: Verification;
   created_at: string;
 }
@@ -120,7 +123,14 @@ export interface Unit {
   bathrooms: number;
   size_sqm?: number;
   rent_amount: number;
-  status: "vacant" | "occupied" | "maintenance";
+  status: "vacant" | "occupied" | "maintenance" | "under_renovation";
+  meter_type?: string;
+  water_source?: string;
+  has_fence: boolean;
+  has_security_gate: boolean;
+  has_balcony: boolean;
+  master_bedrooms: number;
+  has_parking: boolean;
   created_at: string;
   property_title?: string;
 }
@@ -217,11 +227,54 @@ export interface BuildingIncome {
   units: number;
 }
 
+export type SubscriptionStatus = "trial" | "active" | "grace" | "expired";
+
 export interface Subscription {
   id: string;
   landlord_id: string;
-  tier: "free" | "starter" | "growth" | "scale";
+  tier: "free" | "starter" | "growth" | "professional" | "enterprise";
   unit_count: number;
   price_tzs: number;
+  status: SubscriptionStatus;
+  trial_ends_at?: string;
+  current_period_start?: string;
+  current_period_end?: string;
+  grace_ends_at?: string;
+  last_grace_email_day: number;
   created_at: string;
+}
+
+export interface SubscriptionPayment {
+  id: string;
+  subscription_id: string;
+  snippe_reference?: string;
+  amount: number;
+  currency: string;
+  phone_number: string;
+  status: "pending" | "completed" | "failed";
+  idempotency_key: string;
+  period_start: string;
+  period_end: string;
+  paid_at?: string;
+  created_at: string;
+}
+
+export interface SubscriptionResponse {
+  subscription: Subscription;
+  payments: SubscriptionPayment[];
+}
+
+export interface MaintenanceRequest {
+  id: string;
+  unit_id: string;
+  tenant_user_id: string;
+  title: string;
+  description?: string;
+  priority: "low" | "medium" | "high" | "urgent";
+  status: "open" | "in_progress" | "completed" | "closed";
+  created_at: string;
+  updated_at: string;
+  unit_label?: string;
+  property_title?: string;
+  tenant_name?: string;
 }

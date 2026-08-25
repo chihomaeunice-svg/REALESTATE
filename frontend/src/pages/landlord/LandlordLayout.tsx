@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { LayoutDashboard, Building2, Users, FileSignature, BarChart3, CreditCard } from "lucide-react";
 import { useAuth } from "../../lib/auth-context";
 import { VerifiedBadge } from "../../components/VerifiedBadge";
+import { SubscriptionBanner } from "../../components/SubscriptionBanner";
+import { api, type Subscription, type SubscriptionResponse } from "../../lib/api";
 
 const NAV = [
   { to: "/landlord", label: "Overview", icon: LayoutDashboard, end: true },
@@ -14,6 +17,14 @@ const NAV = [
 
 export function LandlordLayout() {
   const { user } = useAuth();
+  const [sub, setSub] = useState<Subscription | null>(null);
+
+  useEffect(() => {
+    api
+      .get<SubscriptionResponse>("/subscription")
+      .then((res) => setSub(res.subscription))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="mx-auto flex max-w-6xl gap-8 px-4 py-8 sm:px-6">
@@ -42,6 +53,7 @@ export function LandlordLayout() {
       </aside>
 
       <div className="min-w-0 flex-1">
+        {sub && <SubscriptionBanner sub={sub} />}
         <Outlet />
       </div>
     </div>

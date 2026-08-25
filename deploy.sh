@@ -11,19 +11,19 @@ echo "=== Syncing code to VPS ==="
 echo "[1/3] Syncing backend..."
 rsync -avz --delete \
   --exclude 'tmp/' --exclude '*.exe' --exclude 'nyumbayangu-api' \
-  -e "ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=no" \
+  -e "ssh -o StrictHostKeyChecking=no " \
   ./backend/ ${VPS_USER}@${VPS}:${APP_DIR}/backend/
 
 # Sync frontend source (not node_modules or dist)
 echo "[2/3] Syncing frontend..."
 rsync -avz --delete \
   --exclude 'node_modules/' --exclude 'dist/' \
-  -e "ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=no" \
+  -e "ssh -o StrictHostKeyChecking=no " \
   ./frontend/ ${VPS_USER}@${VPS}:${APP_DIR}/frontend/
 
 # Run deploy on server
 echo "[3/3] Running deploy on server..."
-ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=no \
+ssh -o StrictHostKeyChecking=no  \
   ${VPS_USER}@${VPS} "bash ${APP_DIR}/deploy.sh"
 
 echo ""

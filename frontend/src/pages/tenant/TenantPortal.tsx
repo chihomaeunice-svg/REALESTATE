@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, MapPin, Smartphone, UserCircle2 } from "lucide-react";
-import { api, type Lease, type PaymentSchedule, type Payment } from "../../lib/api";
+import { FileText, MapPin, Smartphone, UserCircle2, Wrench, Plus } from "lucide-react";
+import { api, type Lease, type PaymentSchedule, type Payment, type MaintenanceRequest } from "../../lib/api";
 import { formatTZS, formatDate, formatDateTime } from "../../lib/format";
 import { ScheduleTable } from "../../components/ScheduleTable";
 import { PaymentHistoryList } from "../../components/PaymentHistoryList";
@@ -16,6 +16,8 @@ export function TenantPortal() {
   const [paying, setPaying] = useState<PaymentSchedule | null>(null);
   const [signing, setSigning] = useState(false);
   const [signatureName, setSignatureName] = useState(user?.full_name ?? "");
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
+  const [showMaintForm, setShowMaintForm] = useState(false);
 
   function loadLeases() {
     api.get<Lease[]>("/tenant/leases").then((data) => {
@@ -23,7 +25,11 @@ export function TenantPortal() {
       if (data.length > 0 && !activeLeaseId) setActiveLeaseId(data[0].id);
     });
   }
+  function loadMaintenanceRequests() {
+    api.get<MaintenanceRequest[]>("/tenant/maintenance-requests").then(setMaintenanceRequests).catch(() => {});
+  }
   useEffect(loadLeases, []);
+  useEffect(loadMaintenanceRequests, []);
 
   function loadDetail(leaseId: string) {
     api.get<PaymentSchedule[]>(`/leases/${leaseId}/schedules`).then(setSchedules);
@@ -128,6 +134,52 @@ export function TenantPortal() {
             <h2 className="mb-4 text-lg font-semibold text-ink-900">Payment history</h2>
             <PaymentHistoryList payments={payments} />
           </div>
+
+          <div className="mt-6 card p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-ink-900">
+                <Wrench className="h-5 w-5 text-ink-400" /> Maintenance requests
+              </h2>
+              <button className="btn-secondary !px-3 !py-1.5 text-xs" onClick={() => setShowMaintForm(!showMaintForm)}>
+                <Plus className="h-3.5 w-3.5" /> New request
+              </button>
+            </div>
+
+            {showMaintForm && (
+              <MaintenanceForm
+                unitId={lease.unit_id}
+                onDone={() => { setShowMaintForm(false); loadMaintenanceRequests(); }}
+                onCancel={() => setShowMaintForm(false)}
+              />
+            )}
+
+            {maintenanceRequests.length === 0 ? (
+              <p className="text-sm text-ink-400">No maintenance requests yet. Report an issue with your unit above.</p>
+            ) : (
+              <div className="space-y-3">
+                {maintenanceRequests.map((mr) => (
+                  <div key={mr.id} className="flex items-start justify-between rounded-xl bg-ink-50 p-4">
+                    <div>
+                      <p className="font-medium text-ink-800">{mr.title}</p>
+                      {mr.description && <p className="mt-1 text-sm text-ink-500">{mr.description}</p>}
+                      <p className="mt-1 text-xs text-ink-400">{mr.unit_label} · {mr.property_title}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        mr.status === "open" ? "bg-sun-50 text-sun-700" :
+                        mr.status === "in_progress" ? "bg-brand-50 text-brand-700" :
+                        mr.status === "completed" ? "bg-green-50 text-green-700" :
+                        "bg-ink-100 text-ink-500"
+                      }`}>{mr.status.replace("_", " ")}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        mr.priority === "urgent" || mr.priority === "high" ? "bg-red-50 text-red-700" : "bg-ink-100 text-ink-500"
+                      }`}>{mr.priority}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </>
       )}
 
@@ -225,5 +277,59 @@ function PayModal({
         )}
       </div>
     </div>
+  );
+}
+
+function MaintenanceForm({ unitId, onDone, onCancel }: { unitId: string; onDone: () => void; onCancel: () => void }) {
+  const [form, setForm] = useState({ title: "", description: "", priority: "medium" });
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError("");
+    try {
+      await api.post("/tenant/maintenance-requests", {
+        unit_id: unitId,
+        title: form.title,
+        description: form.description || undefined,
+        priority: form.priority,
+      });
+      onDone();
+    } catch {
+      setError("Could not submit request.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="mb-4 space-y-3 rounded-xl bg-ink-50 p-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <label className="label">Issue title</label>
+          <input required className="input" placeholder="e.g. Broken pipe in bathroom" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        </div>
+        <div>
+          <label className="label">Priority</label>
+          <select className="input" value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+        <div className="sm:col-span-2">
+          <label className="label">Description (optional)</label>
+          <textarea className="input" rows={3} placeholder="Describe the issue in detail..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+        </div>
+      </div>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      <div className="flex gap-3">
+        <button type="submit" disabled={submitting} className="btn-primary">{submitting ? "Submitting…" : "Submit request"}</button>
+        <button type="button" onClick={onCancel} className="btn-secondary">Cancel</button>
+      </div>
+    </form>
   );
 }
