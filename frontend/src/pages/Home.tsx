@@ -1,20 +1,43 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Search, ShieldCheck, Wallet, FileText, Smartphone, ArrowRight, MapPin } from "lucide-react";
+import {
+  Search, ShieldCheck, Wallet, Smartphone, ArrowRight,
+  Building2, Home as HomeIcon, DoorOpen, Briefcase, Store, Trees,
+} from "lucide-react";
 import { api, type Listing } from "../lib/api";
 import { ListingCard } from "../components/ListingCard";
+import { ArrowCarousel } from "../components/ArrowCarousel";
 import { RecentlyViewedStrip } from "../components/RecentlyViewedStrip";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
+
+const TYPE_ICON: Record<string, typeof HomeIcon> = {
+  apartment: Building2,
+  house: HomeIcon,
+  room: DoorOpen,
+  office: Briefcase,
+  shop: Store,
+  land: Trees,
+};
 
 export function Home() {
   const navigate = useNavigate();
   const [district, setDistrict] = useState("");
   const [propertyType, setPropertyType] = useState("");
-  const [featured, setFeatured] = useState<Listing[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
 
   useEffect(() => {
-    api.get<Listing[]>("/listings").then((data) => setFeatured(data.slice(0, 6)));
+    api.get<Listing[]>("/listings").then(setListings);
   }, []);
+
+  const featured = listings.slice(0, 8);
+  const districtsCovered = new Set(listings.map((l) => l.district)).size || DAR_DISTRICTS.length;
+  const verifiedCount = listings.filter((l) => l.verification === "verified").length;
+
+  const typeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const l of listings) counts[l.property_type] = (counts[l.property_type] ?? 0) + 1;
+    return counts;
+  }, [listings]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -26,165 +49,149 @@ export function Home() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-brand-950">
+      {/* Hero — quiet, photo-backed, floating search card (Direction B) */}
+      <section className="relative overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1600&q=80"
+            src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1600&q=80"
             alt=""
-            className="h-full w-full object-cover opacity-25"
+            className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-950/90 to-brand-950/60" />
+          <div className="absolute inset-0 bg-surface/55 backdrop-blur-[1px]" />
         </div>
-        <div className="relative mx-auto max-w-6xl px-4 py-24 sm:px-6 sm:py-32 lg:py-36">
-          <div className="flex items-center gap-2 text-sm font-medium text-brand-300">
-            <MapPin className="h-4 w-4" />
-            Dar es Salaam
-          </div>
-          <h1 className="mt-4 max-w-xl text-4xl font-semibold leading-[1.15] tracking-tight text-white sm:text-5xl lg:text-[3.5rem]">
-            Find your next home, <span className="font-display italic font-normal text-sun-400">verified</span> and ready.
-          </h1>
-          <p className="mt-5 max-w-lg text-base leading-relaxed text-brand-200/90">
-            Browse verified rentals and listings across Dar es Salaam.
-            Landlords get leases, M-Pesa collection, and tenant management — all in one place.
-          </p>
+        <div className="relative mx-auto max-w-2xl px-4 py-20 sm:px-6 sm:py-28">
+          <div className="rounded-2xl bg-surface/95 p-6 shadow-xl backdrop-blur-sm sm:p-8">
+            <p className="text-sm font-medium text-brand-600">Dar es Salaam</p>
+            <h1 className="mt-2 text-2xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-3xl">
+              A home in Dar es Salaam, <span className="font-display italic font-normal text-brand-600">verified</span> before you call.
+            </h1>
 
-          <form
-            onSubmit={handleSearch}
-            className="mt-10 flex flex-col gap-3 rounded-2xl bg-surface/95 p-3 shadow-2xl backdrop-blur-sm sm:flex-row sm:items-center"
-          >
-            <select
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-              className="flex-1 rounded-xl border-0 bg-transparent px-4 py-3 text-sm text-ink-700 focus:outline-none focus:ring-0"
-            >
-              <option value="">All districts</option>
-              {DAR_DISTRICTS.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
-            <div className="hidden h-8 w-px bg-ink-200 sm:block" />
-            <select
-              value={propertyType}
-              onChange={(e) => setPropertyType(e.target.value)}
-              className="flex-1 rounded-xl border-0 bg-transparent px-4 py-3 text-sm text-ink-700 focus:outline-none focus:ring-0"
-            >
-              <option value="">Any property type</option>
-              {PROPERTY_TYPES.map((p) => (
-                <option key={p.value} value={p.value}>{p.label}</option>
-              ))}
-            </select>
-            <button type="submit" className="btn-accent rounded-xl px-6 py-3">
-              <Search className="h-4 w-4" /> Search
-            </button>
-          </form>
-
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-brand-300/80">
-            <span>Popular: </span>
-            {["Mikocheni", "Msasani", "Upanga", "Kigamboni"].map((w) => (
-              <Link
-                key={w}
-                to={`/listings?district=${w.includes("Mikocheni") || w.includes("Msasani") ? "Kinondoni" : w.includes("Upanga") ? "Ilala" : "Kigamboni"}`}
-                className="underline decoration-brand-400/40 underline-offset-2 transition hover:text-white hover:decoration-white"
+            <form onSubmit={handleSearch} className="mt-6 flex flex-col gap-2 rounded-xl border border-surface-border bg-surface-sunken p-2 sm:flex-row sm:items-center">
+              <select
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                className="flex-1 rounded-lg border-0 bg-transparent px-3 py-2.5 text-sm text-ink-700 focus:outline-none focus:ring-0"
               >
-                {w}
-              </Link>
-            ))}
+                <option value="">All districts</option>
+                {DAR_DISTRICTS.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+              <div className="hidden h-6 w-px bg-ink-200 sm:block" />
+              <select
+                value={propertyType}
+                onChange={(e) => setPropertyType(e.target.value)}
+                className="flex-1 rounded-lg border-0 bg-transparent px-3 py-2.5 text-sm text-ink-700 focus:outline-none focus:ring-0"
+              >
+                <option value="">Any type</option>
+                {PROPERTY_TYPES.map((p) => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+              <button type="submit" className="btn-primary justify-center rounded-lg px-5 py-2.5">
+                <Search className="h-4 w-4" /> Search
+              </button>
+            </form>
+
+            <div className="mt-5 grid grid-cols-3 divide-x divide-surface-border border-t border-surface-border pt-4 text-center">
+              <Stat value={listings.length} label="active listings" />
+              <Stat value={districtsCovered} label="districts covered" />
+              <Stat value={verifiedCount} label="verified listings" />
+            </div>
           </div>
         </div>
       </section>
 
       <RecentlyViewedStrip />
 
-      {/* Featured listings */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-        <div className="flex items-end justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold sm:text-3xl">Recently listed</h2>
-            <p className="mt-1 text-ink-500">Fresh properties across the city.</p>
+      {/* Featured — arrow-driven carousel borrowed from Direction A, kept quiet/light */}
+      {featured.length > 0 && (
+        <section className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:py-16">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Featured</p>
+              <h2 className="mt-1 text-xl font-semibold text-ink-900 sm:text-2xl">This week's picks</h2>
+            </div>
+            <Link
+              to="/listings"
+              className="hidden items-center gap-1 text-sm font-semibold text-brand-600 transition hover:gap-2 sm:flex"
+            >
+              View all <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
-          <Link
-            to="/listings"
-            className="hidden items-center gap-1 text-sm font-semibold text-brand-600 transition hover:gap-2 sm:flex"
-          >
-            View all <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="mt-6">
+            <ArrowCarousel>
+              {featured.map((l) => (
+                <div key={l.id} className="w-64 shrink-0 sm:w-72">
+                  <ListingCard listing={l} />
+                </div>
+              ))}
+            </ArrowCarousel>
+          </div>
+        </section>
+      )}
+
+      {/* Property types — icon tile row, borrowed from Direction A */}
+      <section className="border-y border-surface-border bg-surface-sunken py-14 lg:py-16">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Browse by type</p>
+          <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-6">
+            {PROPERTY_TYPES.map((p) => {
+              const Icon = TYPE_ICON[p.value] ?? Building2;
+              const count = typeCounts[p.value] ?? 0;
+              return (
+                <Link
+                  key={p.value}
+                  to={`/listings?property_type=${p.value}`}
+                  className="card group flex flex-col items-center gap-2 px-2 py-5 text-center transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition group-hover:bg-brand-100">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="text-xs font-semibold text-ink-900">{p.label}</span>
+                  <span className="text-[11px] text-ink-400">{count}</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
-        {featured.length === 0 ? (
-          <p className="mt-8 text-ink-400">No listings yet. Be the first to list a property.</p>
-        ) : (
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((l) => (
-              <ListingCard key={l.id} listing={l} />
-            ))}
-          </div>
-        )}
-        <Link
-          to="/listings"
-          className="mt-6 flex items-center justify-center gap-1 text-sm font-semibold text-brand-600 sm:hidden"
-        >
-          View all listings <ArrowRight className="h-4 w-4" />
-        </Link>
       </section>
 
-      {/* Features */}
-      <section className="border-t border-surface-border bg-surface py-16 lg:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">For landlords</p>
-            <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">
-              The listing is just the <span className="font-display italic font-normal text-brand-600">beginning</span>
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-ink-500">
-              Once a tenant is placed, manage everything from leases to rent collection
-              without spreadsheets, WhatsApp groups, or manual bank reconciliation.
-            </p>
-          </div>
-          <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <Feature
-              icon={FileText}
-              title="Digital leases"
-              text="Swahili and English templates with a signed audit trail. Both parties sign online."
-            />
-            <Feature
-              icon={Wallet}
-              title="Advance-rent schedules"
-              text="6 or 12-month advances modeled natively. Track what's paid and what's due."
-            />
-            <Feature
-              icon={Smartphone}
-              title="M-Pesa collection"
-              text="Tenants pay from their phone. Payments reconcile to schedules automatically."
-            />
-            <Feature
+      {/* Features — minimal inline row, no boxes (Direction B) */}
+      <section className="bg-surface py-14 lg:py-16">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <p className="text-center text-sm font-semibold uppercase tracking-wider text-brand-600">For landlords</p>
+          <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3 sm:divide-x sm:divide-surface-border">
+            <MinimalFeature
               icon={ShieldCheck}
               title="Verified listings"
               text="NIDA-linked identity badges so seekers know which listings are legitimate."
             />
+            <MinimalFeature
+              icon={Wallet}
+              title="Leases & rent, handled"
+              text="Digital leases and advance-rent schedules, tracked automatically."
+              pad
+            />
+            <MinimalFeature
+              icon={Smartphone}
+              title="M-Pesa collection"
+              text="Tenants pay from their phone. Payments reconcile without spreadsheets."
+              pad
+            />
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-brand-950 py-16 lg:py-20">
-        <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
-          <h2 className="text-2xl font-semibold text-white sm:text-3xl">
-            Start managing your properties today
-          </h2>
-          <p className="mx-auto mt-3 max-w-lg text-brand-200/80">
-            Free to list, free to browse. Landlord management tools are priced per unit,
-            starting free for your first property.
+      {/* CTA — slim bar */}
+      <section className="border-t border-surface-border bg-surface-sunken py-10">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 text-center sm:flex-row sm:text-left sm:px-6">
+          <p className="text-sm text-ink-600">
+            Free to list, free to browse. Landlord tools are priced per unit, starting free for your first property.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link to="/register" className="btn-accent px-8 py-3 text-base">
-              Create free account
-            </Link>
-            <Link
-              to="/listings"
-              className="inline-flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold text-brand-200 transition hover:text-white"
-            >
-              Browse listings <ArrowRight className="h-4 w-4" />
-            </Link>
+          <div className="flex shrink-0 items-center gap-3">
+            <Link to="/register" className="btn-primary px-5 py-2.5">Create free account</Link>
+            <Link to="/listings" className="text-sm font-semibold text-brand-600 hover:text-brand-700">Browse listings</Link>
           </div>
         </div>
       </section>
@@ -192,13 +199,20 @@ export function Home() {
   );
 }
 
-function Feature({ icon: Icon, title, text }: { icon: typeof FileText; title: string; text: string }) {
+function Stat({ value, label }: { value: number; label: string }) {
   return (
-    <div className="group">
-      <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-100">
-        <Icon className="h-5 w-5" />
-      </span>
-      <h3 className="text-base font-semibold text-ink-900">{title}</h3>
+    <div className="px-2">
+      <p className="text-lg font-semibold text-ink-900">{value}</p>
+      <p className="mt-0.5 text-xs text-ink-400">{label}</p>
+    </div>
+  );
+}
+
+function MinimalFeature({ icon: Icon, title, text, pad }: { icon: typeof ShieldCheck; title: string; text: string; pad?: boolean }) {
+  return (
+    <div className={pad ? "sm:pl-8" : ""}>
+      <Icon className="h-5 w-5 text-brand-600" />
+      <h3 className="mt-3 text-sm font-semibold text-ink-900">{title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{text}</p>
     </div>
   );
