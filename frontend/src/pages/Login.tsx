@@ -219,7 +219,10 @@ export function Login() {
             />
           </div>
           <div>
-            <label className="label">Password</label>
+            <div className="flex items-center justify-between">
+              <label className="label !mb-0">Password</label>
+              <Link to="/forgot-password" className="text-xs font-medium text-brand-600 hover:text-brand-700">Forgot password?</Link>
+            </div>
             <div className="relative">
               <input
                 required type={showPassword ? "text" : "password"} className="input !pr-11"
