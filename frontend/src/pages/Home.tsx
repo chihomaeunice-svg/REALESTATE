@@ -145,23 +145,30 @@ export function Home() {
 
       <RecentlyViewedStrip />
 
-      {/* Featured — autoplaying arrow carousel borrowed from Direction A, kept quiet/light */}
-      {featured.length > 0 && (
-        <section className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:py-16">
-          <Reveal>
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Featured</p>
-                <h2 className="mt-1 text-xl font-semibold text-ink-900 sm:text-2xl">This week's picks</h2>
-              </div>
-              <Link
-                to="/listings"
-                className="hidden items-center gap-1 text-sm font-semibold text-brand-600 transition hover:gap-2 sm:flex"
-              >
-                View all <ArrowRight className="h-4 w-4" />
-              </Link>
+      {/* Featured — autoplaying arrow carousel borrowed from Direction A, kept quiet/light.
+          Always renders (even with an empty state) so the page never jumps straight
+          from the hero into the slider below with nothing in between. */}
+      <section className="relative mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:py-16">
+        <motion.div
+          className="pointer-events-none absolute -top-4 right-4 h-20 w-20 rounded-full bg-brand-300/25 blur-2xl sm:right-16"
+          animate={{ y: [0, -14, 0], x: [0, 8, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <Reveal>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Featured</p>
+              <h2 className="mt-1 text-xl font-semibold text-ink-900 sm:text-2xl">This week's picks</h2>
             </div>
-          </Reveal>
+            <Link
+              to="/listings"
+              className="hidden items-center gap-1 text-sm font-semibold text-brand-600 transition hover:gap-2 sm:flex"
+            >
+              View all <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </Reveal>
+        {featured.length > 0 ? (
           <div className="mt-6">
             <ArrowCarousel>
               {featured.map((l, i) => (
@@ -176,22 +183,35 @@ export function Home() {
               ))}
             </ArrowCarousel>
           </div>
-        </section>
-      )}
+        ) : (
+          <Reveal delay={80} className="mt-6 rounded-2xl border border-dashed border-surface-border bg-surface-sunken px-6 py-10 text-center">
+            <p className="text-sm text-ink-400">No listings yet. Be the first to list a property.</p>
+          </Reveal>
+        )}
+      </section>
 
-      {/* What you can find — scroll-pinned split slider per property type */}
+      {/* What you can find — scroll-pinned split slider per property type.
+          loop=false: with a fixed set of 6 types this is a one-pass slider, not an
+          endless carousel — looping would jump back to slide 1 before releasing the
+          scroll, which reads as a glitch when the slider sits mid-page. */}
       <SplitPhotoSlider
         slides={typeSlides}
         brand={<>Nyumba <em style={{ fontStyle: "italic", color: "#f59e0b" }}>Yangu</em></>}
         accent="#f59e0b"
         height="85vh"
         scrollPerSlide={0.55}
+        loop={false}
         onCta={(_, i) => navigate(`/listings?property_type=${PROPERTY_TYPES[i].value}`)}
       />
 
       {/* Features — minimal inline row, no boxes (Direction B) */}
-      <section className="bg-surface py-14 lg:py-16">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+      <section className="relative overflow-hidden bg-surface py-14 lg:py-16">
+        <motion.div
+          className="pointer-events-none absolute -left-10 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full bg-sun-400/20 blur-2xl"
+          animate={{ y: [0, 18, 0], rotate: [0, -8, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
           <p className="text-center text-sm font-semibold uppercase tracking-wider text-brand-600">For landlords</p>
           <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3 sm:divide-x sm:divide-surface-border">
             <Reveal delay={0}>
