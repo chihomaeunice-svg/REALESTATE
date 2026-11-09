@@ -79,14 +79,16 @@ export function Home() {
             Landlords get leases, M-Pesa collection, and tenant management — all in one place.
           </p>
 
-          <form
-            onSubmit={handleSearch}
-            className="mt-10 flex flex-col gap-3 rounded-2xl bg-surface/95 p-3 shadow-2xl backdrop-blur-sm sm:flex-row sm:items-center"
-          >
-            <select
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-              className="flex-1 rounded-xl border-0 bg-transparent px-4 py-3 text-sm text-ink-700 focus:outline-none focus:ring-0"
+          <Reveal className="relative rounded-2xl bg-surface/95 p-6 shadow-xl backdrop-blur-sm sm:p-8">
+            <div className="absolute -right-4 -top-4 hidden sm:block">
+              <SpinBadge />
+            </div>
+            <p className="text-sm font-medium text-brand-600">Dar es Salaam</p>
+            <motion.h1
+              className="mt-2 text-2xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-3xl"
+              initial={{ opacity: 0, x: -24, filter: "blur(6px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             >
               <option value="">All districts</option>
               {DAR_DISTRICTS.map((d) => (
@@ -251,16 +253,9 @@ export function Home() {
             Free to list, free to browse. Landlord management tools are priced per unit,
             starting free for your first property.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link to="/register" className="btn-accent px-8 py-3 text-base">
-              Create free account
-            </Link>
-            <Link
-              to="/listings"
-              className="inline-flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold text-brand-200 transition hover:text-white"
-            >
-              Browse listings <ArrowRight className="h-4 w-4" />
-            </Link>
+          <div className="flex shrink-0 items-center gap-3">
+            <Link to="/register" className="btn-primary px-5 py-2.5">Create free account</Link>
+            <Link to="/listings" className="text-sm font-semibold text-brand-600 hover:text-brand-700">Browse listings</Link>
           </div>
         </Reveal>
       </section>
@@ -268,13 +263,20 @@ export function Home() {
   );
 }
 
-function Feature({ icon: Icon, title, text }: { icon: typeof FileText; title: string; text: string }) {
+function Stat({ value, label }: { value: number; label: string }) {
   return (
-    <div className="group">
-      <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-100">
-        <Icon className="h-5 w-5" />
-      </span>
-      <h3 className="text-base font-semibold text-ink-900">{title}</h3>
+    <div className="px-2">
+      <p className="text-lg font-semibold text-ink-900"><CountUp value={value} /></p>
+      <p className="mt-0.5 text-xs text-ink-400">{label}</p>
+    </div>
+  );
+}
+
+function MinimalFeature({ icon: Icon, title, text }: { icon: typeof ShieldCheck; title: string; text: string }) {
+  return (
+    <div>
+      <Icon className="h-5 w-5 text-brand-600" />
+      <h3 className="mt-3 text-sm font-semibold text-ink-900">{title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{text}</p>
     </div>
   );
