@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, ShieldCheck, Wallet, Smartphone, ArrowRight } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { api, type Listing } from "../lib/api";
 import { ListingCard } from "../components/ListingCard";
 import { ArrowCarousel } from "../components/ArrowCarousel";
@@ -11,6 +11,7 @@ import { CountUp } from "../components/CountUp";
 import { SpinBadge } from "../components/SpinBadge";
 import { SquiggleLine } from "../components/SquiggleLine";
 import SplitPhotoSlider, { type SplitSlide } from "../components/SplitPhotoSlider";
+import { HeroParallax, type ParallaxProduct } from "../components/HeroParallax";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
 
 const TYPE_PHOTO: Record<string, string> = {
@@ -21,6 +22,61 @@ const TYPE_PHOTO: Record<string, string> = {
   shop: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80",
   land: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80",
 };
+
+// Every real landlord benefit the platform ships today — no placeholders for
+// features that don't exist yet. Each links to /register, the landlord signup.
+const LANDLORD_BENEFITS: ParallaxProduct[] = [
+  {
+    title: "Digital leases, signed online",
+    link: "/register",
+    thumbnail: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80",
+  },
+  {
+    title: "6 or 12-month advance-rent schedules",
+    link: "/register",
+    thumbnail: "https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=600&q=80",
+  },
+  {
+    title: "M-Pesa collection, auto-reconciled",
+    link: "/register",
+    thumbnail: "https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=600&q=80",
+  },
+  {
+    title: "NIDA-linked verified listings",
+    link: "/register",
+    thumbnail: "https://images.unsplash.com/photo-1586880244406-556ebe35f282?w=600&q=80",
+  },
+  {
+    title: "Tenant maintenance requests, tracked",
+    link: "/register",
+    thumbnail: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&q=80",
+  },
+  {
+    title: "Amenities checklist per unit",
+    link: "/register",
+    thumbnail: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80",
+  },
+  {
+    title: "Every property, one dashboard",
+    link: "/register",
+    thumbnail: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80",
+  },
+  {
+    title: "Listing view-counts, so you know what's working",
+    link: "/register",
+    thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80",
+  },
+  {
+    title: "A free tenant portal included",
+    link: "/register",
+    thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80",
+  },
+  {
+    title: "Free for your first unit, priced per unit after",
+    link: "/register",
+    thumbnail: "https://images.unsplash.com/photo-1554469384-e58fac937c8c?w=600&q=80",
+  },
+];
 
 export function Home() {
   const navigate = useNavigate();
@@ -204,40 +260,12 @@ export function Home() {
         onCta={(_, i) => navigate(`/listings?property_type=${PROPERTY_TYPES[i].value}`)}
       />
 
-      {/* Features — minimal inline row, no boxes (Direction B) */}
-      <section className="relative overflow-hidden bg-surface py-14 lg:py-16">
-        <motion.div
-          className="pointer-events-none absolute -left-10 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full bg-sun-400/20 blur-2xl"
-          animate={{ y: [0, 18, 0], rotate: [0, -8, 0] }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
-          <p className="text-center text-sm font-semibold uppercase tracking-wider text-brand-600">For landlords</p>
-          <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3 sm:divide-x sm:divide-surface-border">
-            <Reveal delay={0}>
-              <MinimalFeature
-                icon={ShieldCheck}
-                title="Verified listings"
-                text="NIDA-linked identity badges so seekers know which listings are legitimate."
-              />
-            </Reveal>
-            <Reveal delay={90} className="sm:pl-8">
-              <MinimalFeature
-                icon={Wallet}
-                title="Leases & rent, handled"
-                text="Digital leases and advance-rent schedules, tracked automatically."
-              />
-            </Reveal>
-            <Reveal delay={180} className="sm:pl-8">
-              <MinimalFeature
-                icon={Smartphone}
-                title="M-Pesa collection"
-                text="Tenants pay from their phone. Payments reconcile without spreadsheets."
-              />
-            </Reveal>
-          </div>
-        </div>
-      </section>
+      {/* For landlords — every real benefit, as a 3D scroll-parallax grid */}
+      <HeroParallax
+        products={LANDLORD_BENEFITS}
+        title="Everything landlords are eased with"
+        subtitle="One place for leases, rent, and tenants — instead of spreadsheets, WhatsApp groups, and manual bank reconciliation."
+      />
 
       {/* CTA — slim bar */}
       <section className="border-t border-surface-border bg-surface-sunken py-10">
@@ -264,12 +292,3 @@ function Stat({ value, label }: { value: number; label: string }) {
   );
 }
 
-function MinimalFeature({ icon: Icon, title, text }: { icon: typeof ShieldCheck; title: string; text: string }) {
-  return (
-    <div>
-      <Icon className="h-5 w-5 text-brand-600" />
-      <h3 className="mt-3 text-sm font-semibold text-ink-900">{title}</h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{text}</p>
-    </div>
-  );
-}
