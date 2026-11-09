@@ -191,4 +191,14 @@
     color: var(--color-text-muted);
   }
 
+  @keyframes kenburns {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.08); }
+  }
+  .animate-kenburns {
+    animation: kenburns 18s ease-in-out infinite alternate;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-kenburns { animation: none; }
+  }
 }

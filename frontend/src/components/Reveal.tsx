@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { useInView } from "../lib/useInView";
 
 export function Reveal({
   children,
@@ -9,15 +9,17 @@ export function Reveal({
   delay?: number;
   className?: string;
 }) {
+  const { ref, inView } = useInView<HTMLDivElement>();
+
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.5, delay: delay / 1000, ease: [0.16, 1, 0.3, 1] }}
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out motion-reduce:transition-none ${
+        inView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+      } ${className}`}
+      style={{ transitionDelay: inView ? `${delay}ms` : "0ms" }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
