@@ -11,6 +11,7 @@ import { RecentlyViewedStrip } from "../components/RecentlyViewedStrip";
 import { Reveal } from "../components/Reveal";
 import { CountUp } from "../components/CountUp";
 import { SpinBadge } from "../components/SpinBadge";
+import { SquiggleLine } from "../components/SquiggleLine";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
 
 const TYPE_ICON: Record<string, typeof HomeIcon> = {
@@ -69,13 +70,15 @@ export function Home() {
             className="pointer-events-none absolute -bottom-6 left-2 h-24 w-24 rounded-full bg-brand-400/25 blur-2xl animate-float-slow sm:left-6"
             style={{ animationDelay: "1.4s" }}
           />
+          {/* hand-drawn squiggle, draws itself in once the hero scrolls into view */}
+          <SquiggleLine className="pointer-events-none absolute -left-8 top-6 hidden h-24 w-40 text-sun-500/70 sm:block" />
 
           <Reveal className="relative rounded-2xl bg-surface/95 p-6 shadow-xl backdrop-blur-sm sm:p-8">
             <div className="absolute -right-4 -top-4 hidden sm:block">
               <SpinBadge />
             </div>
             <p className="text-sm font-medium text-brand-600">Dar es Salaam</p>
-            <h1 className="mt-2 text-2xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-3xl">
+            <h1 className="mt-2 animate-text-whoosh text-2xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-3xl">
               A home in Dar es Salaam, <span className="font-display italic font-normal text-brand-600">verified</span> before you call.
             </h1>
 
@@ -136,8 +139,13 @@ export function Home() {
           </Reveal>
           <div className="mt-6">
             <ArrowCarousel>
-              {featured.map((l) => (
-                <div key={l.id} className="w-64 shrink-0 sm:w-72">
+              {featured.map((l, i) => (
+                <div
+                  key={l.id}
+                  className={`w-64 shrink-0 transition-transform duration-300 hover:rotate-0 hover:scale-[1.03] sm:w-72 ${
+                    i % 2 === 0 ? "-rotate-2" : "rotate-2"
+                  }`}
+                >
                   <ListingCard listing={l} />
                 </div>
               ))}
