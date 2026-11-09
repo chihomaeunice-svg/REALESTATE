@@ -1,21 +1,49 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export function ArrowCarousel({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+export function ArrowCarousel({
+  children,
+  dark = false,
+  autoPlay = true,
+  interval = 3800,
+}: {
+  children: React.ReactNode;
+  dark?: boolean;
+  autoPlay?: boolean;
+  interval?: number;
+}) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const [paused, setPaused] = useState(false);
 
   function scroll(dir: 1 | -1) {
     const el = trackRef.current;
     if (!el) return;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    if (dir === 1 && atEnd) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+      return;
+    }
     el.scrollBy({ left: dir * el.clientWidth * 0.82, behavior: "smooth" });
   }
+
+  useEffect(() => {
+    if (!autoPlay || paused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => scroll(1), interval);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPlay, paused, interval]);
 
   const arrowClass = dark
     ? "border-white/25 text-white hover:bg-white/10"
     : "border-ink-200 text-ink-600 hover:bg-ink-50";
 
   return (
-    <div>
+    <div
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={() => setPaused(true)}
+    >
       <div
         ref={trackRef}
         className="flex gap-5 overflow-x-auto scroll-smooth pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

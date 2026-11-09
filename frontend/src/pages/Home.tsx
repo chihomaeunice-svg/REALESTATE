@@ -8,6 +8,8 @@ import { api, type Listing } from "../lib/api";
 import { ListingCard } from "../components/ListingCard";
 import { ArrowCarousel } from "../components/ArrowCarousel";
 import { RecentlyViewedStrip } from "../components/RecentlyViewedStrip";
+import { Reveal } from "../components/Reveal";
+import { CountUp } from "../components/CountUp";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
 
 const TYPE_ICON: Record<string, typeof HomeIcon> = {
@@ -55,12 +57,12 @@ export function Home() {
           <img
             src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1600&q=80"
             alt=""
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover animate-kenburns"
           />
           <div className="absolute inset-0 bg-surface/55 backdrop-blur-[1px]" />
         </div>
         <div className="relative mx-auto max-w-2xl px-4 py-20 sm:px-6 sm:py-28">
-          <div className="rounded-2xl bg-surface/95 p-6 shadow-xl backdrop-blur-sm sm:p-8">
+          <Reveal className="rounded-2xl bg-surface/95 p-6 shadow-xl backdrop-blur-sm sm:p-8">
             <p className="text-sm font-medium text-brand-600">Dar es Salaam</p>
             <h1 className="mt-2 text-2xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-3xl">
               A home in Dar es Salaam, <span className="font-display italic font-normal text-brand-600">verified</span> before you call.
@@ -98,27 +100,29 @@ export function Home() {
               <Stat value={districtsCovered} label="districts covered" />
               <Stat value={verifiedCount} label="verified listings" />
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       <RecentlyViewedStrip />
 
-      {/* Featured — arrow-driven carousel borrowed from Direction A, kept quiet/light */}
+      {/* Featured — autoplaying arrow carousel borrowed from Direction A, kept quiet/light */}
       {featured.length > 0 && (
         <section className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:py-16">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Featured</p>
-              <h2 className="mt-1 text-xl font-semibold text-ink-900 sm:text-2xl">This week's picks</h2>
+          <Reveal>
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Featured</p>
+                <h2 className="mt-1 text-xl font-semibold text-ink-900 sm:text-2xl">This week's picks</h2>
+              </div>
+              <Link
+                to="/listings"
+                className="hidden items-center gap-1 text-sm font-semibold text-brand-600 transition hover:gap-2 sm:flex"
+              >
+                View all <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
-            <Link
-              to="/listings"
-              className="hidden items-center gap-1 text-sm font-semibold text-brand-600 transition hover:gap-2 sm:flex"
-            >
-              View all <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+          </Reveal>
           <div className="mt-6">
             <ArrowCarousel>
               {featured.map((l) => (
@@ -134,23 +138,26 @@ export function Home() {
       {/* Property types — icon tile row, borrowed from Direction A */}
       <section className="border-y border-surface-border bg-surface-sunken py-14 lg:py-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Browse by type</p>
+          <Reveal>
+            <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Browse by type</p>
+          </Reveal>
           <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-6">
-            {PROPERTY_TYPES.map((p) => {
+            {PROPERTY_TYPES.map((p, i) => {
               const Icon = TYPE_ICON[p.value] ?? Building2;
               const count = typeCounts[p.value] ?? 0;
               return (
-                <Link
-                  key={p.value}
-                  to={`/listings?property_type=${p.value}`}
-                  className="card group flex flex-col items-center gap-2 px-2 py-5 text-center transition hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition group-hover:bg-brand-100">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="text-xs font-semibold text-ink-900">{p.label}</span>
-                  <span className="text-[11px] text-ink-400">{count}</span>
-                </Link>
+                <Reveal key={p.value} delay={i * 50}>
+                  <Link
+                    to={`/listings?property_type=${p.value}`}
+                    className="card group flex flex-col items-center gap-2 px-2 py-5 text-center transition hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition group-hover:bg-brand-100">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className="text-xs font-semibold text-ink-900">{p.label}</span>
+                    <span className="text-[11px] text-ink-400"><CountUp value={count} /></span>
+                  </Link>
+                </Reveal>
               );
             })}
           </div>
@@ -162,30 +169,34 @@ export function Home() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <p className="text-center text-sm font-semibold uppercase tracking-wider text-brand-600">For landlords</p>
           <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3 sm:divide-x sm:divide-surface-border">
-            <MinimalFeature
-              icon={ShieldCheck}
-              title="Verified listings"
-              text="NIDA-linked identity badges so seekers know which listings are legitimate."
-            />
-            <MinimalFeature
-              icon={Wallet}
-              title="Leases & rent, handled"
-              text="Digital leases and advance-rent schedules, tracked automatically."
-              pad
-            />
-            <MinimalFeature
-              icon={Smartphone}
-              title="M-Pesa collection"
-              text="Tenants pay from their phone. Payments reconcile without spreadsheets."
-              pad
-            />
+            <Reveal delay={0}>
+              <MinimalFeature
+                icon={ShieldCheck}
+                title="Verified listings"
+                text="NIDA-linked identity badges so seekers know which listings are legitimate."
+              />
+            </Reveal>
+            <Reveal delay={90} className="sm:pl-8">
+              <MinimalFeature
+                icon={Wallet}
+                title="Leases & rent, handled"
+                text="Digital leases and advance-rent schedules, tracked automatically."
+              />
+            </Reveal>
+            <Reveal delay={180} className="sm:pl-8">
+              <MinimalFeature
+                icon={Smartphone}
+                title="M-Pesa collection"
+                text="Tenants pay from their phone. Payments reconcile without spreadsheets."
+              />
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* CTA — slim bar */}
       <section className="border-t border-surface-border bg-surface-sunken py-10">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 text-center sm:flex-row sm:text-left sm:px-6">
+        <Reveal className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 text-center sm:flex-row sm:text-left sm:px-6">
           <p className="text-sm text-ink-600">
             Free to list, free to browse. Landlord tools are priced per unit, starting free for your first property.
           </p>
@@ -193,7 +204,7 @@ export function Home() {
             <Link to="/register" className="btn-primary px-5 py-2.5">Create free account</Link>
             <Link to="/listings" className="text-sm font-semibold text-brand-600 hover:text-brand-700">Browse listings</Link>
           </div>
-        </div>
+        </Reveal>
       </section>
     </div>
   );
@@ -202,15 +213,15 @@ export function Home() {
 function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div className="px-2">
-      <p className="text-lg font-semibold text-ink-900">{value}</p>
+      <p className="text-lg font-semibold text-ink-900"><CountUp value={value} /></p>
       <p className="mt-0.5 text-xs text-ink-400">{label}</p>
     </div>
   );
 }
 
-function MinimalFeature({ icon: Icon, title, text, pad }: { icon: typeof ShieldCheck; title: string; text: string; pad?: boolean }) {
+function MinimalFeature({ icon: Icon, title, text }: { icon: typeof ShieldCheck; title: string; text: string }) {
   return (
-    <div className={pad ? "sm:pl-8" : ""}>
+    <div>
       <Icon className="h-5 w-5 text-brand-600" />
       <h3 className="mt-3 text-sm font-semibold text-ink-900">{title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{text}</p>
