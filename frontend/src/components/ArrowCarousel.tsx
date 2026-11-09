@@ -5,7 +5,7 @@ export function ArrowCarousel({
   children,
   dark = false,
   autoPlay = true,
-  interval = 3800,
+  interval = 2600,
 }: {
   children: React.ReactNode;
   dark?: boolean;
