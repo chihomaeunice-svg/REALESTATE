@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   Search, ShieldCheck, Wallet, Smartphone, ArrowRight,
   Building2, Home as HomeIcon, DoorOpen, Briefcase, Store, Trees,
@@ -56,19 +57,26 @@ export function Home() {
       {/* Hero — quiet, photo-backed, floating search card (Direction B) */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img
+          <motion.img
             src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1600&q=80"
             alt=""
-            className="h-full w-full object-cover animate-kenburns"
+            className="h-full w-full object-cover"
+            animate={{ scale: [1, 1.08, 1] }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
           />
           <div className="absolute inset-0 bg-surface/55 backdrop-blur-[1px]" />
         </div>
         <div className="relative mx-auto max-w-2xl px-4 py-20 sm:px-6 sm:py-28">
           {/* ambient floating shapes — constant idle motion, independent of scroll */}
-          <div className="pointer-events-none absolute -top-10 right-6 h-32 w-32 rounded-full bg-sun-400/30 blur-2xl animate-float-slow sm:right-10" />
-          <div
-            className="pointer-events-none absolute -bottom-6 left-2 h-24 w-24 rounded-full bg-brand-400/25 blur-2xl animate-float-slow sm:left-6"
-            style={{ animationDelay: "1.4s" }}
+          <motion.div
+            className="pointer-events-none absolute -top-10 right-6 h-32 w-32 rounded-full bg-sun-400/30 blur-2xl sm:right-10"
+            animate={{ y: [0, -16, 0], rotate: [0, 6, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="pointer-events-none absolute -bottom-6 left-2 h-24 w-24 rounded-full bg-brand-400/25 blur-2xl sm:left-6"
+            animate={{ y: [0, -16, 0], rotate: [0, 6, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1.4 }}
           />
           {/* hand-drawn squiggle, draws itself in once the hero scrolls into view */}
           <SquiggleLine className="pointer-events-none absolute -left-8 top-6 hidden h-24 w-40 text-sun-500/70 sm:block" />
@@ -78,9 +86,14 @@ export function Home() {
               <SpinBadge />
             </div>
             <p className="text-sm font-medium text-brand-600">Dar es Salaam</p>
-            <h1 className="mt-2 animate-text-whoosh text-2xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-3xl">
+            <motion.h1
+              className="mt-2 text-2xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-3xl"
+              initial={{ opacity: 0, x: -24, filter: "blur(6px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            >
               A home in Dar es Salaam, <span className="font-display italic font-normal text-brand-600">verified</span> before you call.
-            </h1>
+            </motion.h1>
 
             <form onSubmit={handleSearch} className="mt-6 flex flex-col gap-2 rounded-xl border border-surface-border bg-surface-sunken p-2 sm:flex-row sm:items-center">
               <select
