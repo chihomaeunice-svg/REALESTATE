@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useAuth } from "../lib/auth-context";
 import { useWishlist } from "../lib/wishlist-context";
 import { useTheme } from "../lib/theme-context";
+import { useCurrency } from "../lib/currency-context";
 import { Logo } from "./Logo";
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const { ids } = useWishlist();
   const { theme, toggle: toggleTheme } = useTheme();
+  const { currency, toggle: toggleCurrency } = useCurrency();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -84,15 +86,30 @@ export function Navbar() {
             </>
           )}
           <button
+            onClick={toggleCurrency}
+            aria-label="Toggle currency"
+            title="Prices shown in"
+            className="ml-1 flex h-9 items-center justify-center rounded-lg px-2 text-xs font-semibold text-ink-500 transition hover:bg-ink-50 hover:text-ink-900"
+          >
+            {currency}
+          </button>
+          <button
             onClick={toggleTheme}
             aria-label="Toggle dark mode"
-            className="ml-2 flex h-9 w-9 items-center justify-center rounded-lg text-ink-500 transition hover:bg-ink-50 hover:text-ink-900"
+            className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-ink-500 transition hover:bg-ink-50 hover:text-ink-900"
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
         </nav>
 
         <div className="flex items-center gap-1 md:hidden">
+          <button
+            onClick={toggleCurrency}
+            aria-label="Toggle currency"
+            className="flex h-9 items-center justify-center rounded-lg px-2 text-xs font-semibold text-ink-500 transition hover:bg-ink-50"
+          >
+            {currency}
+          </button>
           <button
             onClick={toggleTheme}
             aria-label="Toggle dark mode"

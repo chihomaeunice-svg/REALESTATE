@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { BedDouble, Bath, Ruler, MapPin, Phone, CheckCircle2, ShieldCheck, Calendar, MessageCircle, ArrowLeft } from "lucide-react";
 import { api, type Listing } from "../lib/api";
-import { formatTZS, formatDate } from "../lib/format";
+import { formatDate } from "../lib/format";
+import { useCurrency } from "../lib/currency-context";
 import { VerifiedBadge } from "../components/VerifiedBadge";
 import { WishlistButton } from "../components/WishlistButton";
 import { PROPERTY_TYPE_LABEL, NO_UNIT_TYPES } from "../lib/constants";
@@ -12,6 +13,7 @@ import { SimilarListings } from "../components/SimilarListings";
 
 export function ListingDetail() {
   const { id } = useParams();
+  const { format } = useCurrency();
   const [listing, setListing] = useState<Listing | null>(null);
   const [showContact, setShowContact] = useState(false);
   const [form, setForm] = useState({ seeker_name: "", seeker_phone: "", message: "" });
@@ -121,7 +123,7 @@ export function ListingDetail() {
         <aside className="lg:sticky lg:top-24 lg:h-fit">
           <div className="card p-6">
             <p className="text-3xl font-semibold text-ink-900">
-              {formatTZS(listing.price)}
+              {format(listing.price)}
               {listing.price_period !== "total" && (
                 <span className="text-base font-normal text-ink-400"> /{listing.price_period}</span>
               )}

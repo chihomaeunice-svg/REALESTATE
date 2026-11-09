@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./lib/auth-context";
 import { WishlistProvider } from "./lib/wishlist-context";
 import { ThemeProvider } from "./lib/theme-context";
+import { CurrencyProvider } from "./lib/currency-context";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -101,6 +102,7 @@ function AppShell() {
 export default function App() {
   return (
     <ThemeProvider>
+    <CurrencyProvider>
     <BrowserRouter>
       <AuthProvider>
         <WishlistProvider>
@@ -108,6 +110,7 @@ export default function App() {
         </WishlistProvider>
       </AuthProvider>
     </BrowserRouter>
+    </CurrencyProvider>
     </ThemeProvider>
   );
 }
