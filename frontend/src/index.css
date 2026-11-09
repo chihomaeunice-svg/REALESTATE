@@ -51,6 +51,13 @@
   --color-text: #0f172a;
   --color-text-muted: #475569;
   --color-text-faint: #94a3b8;
+
+  /* shadcn-style aliases some pasted-in components expect (e.g. SplitPhotoSlider).
+     Defined once, as references — they pick up whichever light/dark value
+     --color-text/--color-surface/--color-text-muted currently resolve to. */
+  --color-foreground: var(--color-text);
+  --color-background: var(--color-surface);
+  --color-muted-foreground: var(--color-text-muted);
 }
 
 @layer base {

@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  Search, ShieldCheck, Wallet, Smartphone, ArrowRight,
-  Building2, Home as HomeIcon, DoorOpen, Briefcase, Store, Trees,
-} from "lucide-react";
+import { Search, ShieldCheck, Wallet, Smartphone, ArrowRight } from "lucide-react";
 import { api, type Listing } from "../lib/api";
 import { ListingCard } from "../components/ListingCard";
 import { ArrowCarousel } from "../components/ArrowCarousel";
@@ -13,15 +10,16 @@ import { Reveal } from "../components/Reveal";
 import { CountUp } from "../components/CountUp";
 import { SpinBadge } from "../components/SpinBadge";
 import { SquiggleLine } from "../components/SquiggleLine";
+import SplitPhotoSlider, { type SplitSlide } from "../components/SplitPhotoSlider";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
 
-const TYPE_ICON: Record<string, typeof HomeIcon> = {
-  apartment: Building2,
-  house: HomeIcon,
-  room: DoorOpen,
-  office: Briefcase,
-  shop: Store,
-  land: Trees,
+const TYPE_PHOTO: Record<string, string> = {
+  apartment: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+  house: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&q=80",
+  room: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80",
+  office: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+  shop: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80",
+  land: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80",
 };
 
 export function Home() {
@@ -43,6 +41,20 @@ export function Home() {
     for (const l of listings) counts[l.property_type] = (counts[l.property_type] ?? 0) + 1;
     return counts;
   }, [listings]);
+
+  const typeSlides: SplitSlide[] = useMemo(
+    () =>
+      PROPERTY_TYPES.map((p) => {
+        const count = typeCounts[p.value] ?? 0;
+        return {
+          title: p.label,
+          description: `${count} ${p.label.toLowerCase()} ${count === 1 ? "listing" : "listings"} available across Dar es Salaam right now.`,
+          image: TYPE_PHOTO[p.value],
+          cta: `Browse ${p.label.toLowerCase()}`,
+        };
+      }),
+    [typeCounts]
+  );
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -167,34 +179,15 @@ export function Home() {
         </section>
       )}
 
-      {/* Property types — icon tile row, borrowed from Direction A */}
-      <section className="border-y border-surface-border bg-surface-sunken py-14 lg:py-16">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <Reveal>
-            <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Browse by type</p>
-          </Reveal>
-          <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-6">
-            {PROPERTY_TYPES.map((p, i) => {
-              const Icon = TYPE_ICON[p.value] ?? Building2;
-              const count = typeCounts[p.value] ?? 0;
-              return (
-                <Reveal key={p.value} delay={i * 50}>
-                  <Link
-                    to={`/listings?property_type=${p.value}`}
-                    className="card group flex flex-col items-center gap-2 px-2 py-5 text-center transition hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition group-hover:bg-brand-100">
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <span className="text-xs font-semibold text-ink-900">{p.label}</span>
-                    <span className="text-[11px] text-ink-400"><CountUp value={count} /></span>
-                  </Link>
-                </Reveal>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      {/* What you can find — scroll-pinned split slider per property type */}
+      <SplitPhotoSlider
+        slides={typeSlides}
+        brand={<>Nyumba <em style={{ fontStyle: "italic", color: "#f59e0b" }}>Yangu</em></>}
+        accent="#f59e0b"
+        height="85vh"
+        scrollPerSlide={0.55}
+        onCta={(_, i) => navigate(`/listings?property_type=${PROPERTY_TYPES[i].value}`)}
+      />
 
       {/* Features — minimal inline row, no boxes (Direction B) */}
       <section className="bg-surface py-14 lg:py-16">
