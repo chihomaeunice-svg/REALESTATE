@@ -14,8 +14,8 @@ export function Reveal({
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ease-out motion-reduce:transition-none ${
-        inView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+      className={`transition-all duration-500 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none ${
+        inView ? "translate-y-0 scale-100 opacity-100" : "translate-y-10 scale-95 opacity-0"
       } ${className}`}
       style={{ transitionDelay: inView ? `${delay}ms` : "0ms" }}
     >

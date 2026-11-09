@@ -10,6 +10,7 @@ import { ArrowCarousel } from "../components/ArrowCarousel";
 import { RecentlyViewedStrip } from "../components/RecentlyViewedStrip";
 import { Reveal } from "../components/Reveal";
 import { CountUp } from "../components/CountUp";
+import { SpinBadge } from "../components/SpinBadge";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
 
 const TYPE_ICON: Record<string, typeof HomeIcon> = {
@@ -62,7 +63,17 @@ export function Home() {
           <div className="absolute inset-0 bg-surface/55 backdrop-blur-[1px]" />
         </div>
         <div className="relative mx-auto max-w-2xl px-4 py-20 sm:px-6 sm:py-28">
-          <Reveal className="rounded-2xl bg-surface/95 p-6 shadow-xl backdrop-blur-sm sm:p-8">
+          {/* ambient floating shapes — constant idle motion, independent of scroll */}
+          <div className="pointer-events-none absolute -top-10 right-6 h-32 w-32 rounded-full bg-sun-400/30 blur-2xl animate-float-slow sm:right-10" />
+          <div
+            className="pointer-events-none absolute -bottom-6 left-2 h-24 w-24 rounded-full bg-brand-400/25 blur-2xl animate-float-slow sm:left-6"
+            style={{ animationDelay: "1.4s" }}
+          />
+
+          <Reveal className="relative rounded-2xl bg-surface/95 p-6 shadow-xl backdrop-blur-sm sm:p-8">
+            <div className="absolute -right-4 -top-4 hidden sm:block">
+              <SpinBadge />
+            </div>
             <p className="text-sm font-medium text-brand-600">Dar es Salaam</p>
             <h1 className="mt-2 text-2xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-3xl">
               A home in Dar es Salaam, <span className="font-display italic font-normal text-brand-600">verified</span> before you call.

@@ -194,4 +194,24 @@
   @media (prefers-reduced-motion: reduce) {
     .animate-kenburns { animation: none; }
   }
+
+  @keyframes badge-spin {
+    to { transform: rotate(360deg); }
+  }
+  .animate-badge-spin {
+    animation: badge-spin 14s linear infinite;
+  }
+
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-16px) rotate(6deg); }
+  }
+  .animate-float-slow {
+    animation: float-slow 7s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-badge-spin,
+    .animate-float-slow { animation: none; }
+  }
 }
