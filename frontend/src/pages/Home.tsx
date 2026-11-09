@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, ArrowRight } from "lucide-react";
+import {
+  Search, ArrowRight, FileText, CalendarClock, Smartphone, ShieldCheck,
+  Wrench, ListChecks, LayoutDashboard, Eye, Users, BadgePercent,
+} from "lucide-react";
 import { api, type Listing } from "../lib/api";
 import { ListingCard } from "../components/ListingCard";
 import { ArrowCarousel } from "../components/ArrowCarousel";
@@ -11,7 +14,6 @@ import { CountUp } from "../components/CountUp";
 import { SpinBadge } from "../components/SpinBadge";
 import { SquiggleLine } from "../components/SquiggleLine";
 import SplitPhotoSlider, { type SplitSlide } from "../components/SplitPhotoSlider";
-import { HeroParallax, type ParallaxProduct } from "../components/HeroParallax";
 import { DAR_DISTRICTS, PROPERTY_TYPES } from "../lib/constants";
 
 const TYPE_PHOTO: Record<string, string> = {
@@ -24,58 +26,19 @@ const TYPE_PHOTO: Record<string, string> = {
 };
 
 // Every real landlord benefit the platform ships today — no placeholders for
-// features that don't exist yet. Each links to /register, the landlord signup.
-const LANDLORD_BENEFITS: ParallaxProduct[] = [
-  {
-    title: "Digital leases, signed online",
-    link: "/register",
-    thumbnail: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80",
-  },
-  {
-    title: "6 or 12-month advance-rent schedules",
-    link: "/register",
-    thumbnail: "https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=600&q=80",
-  },
-  {
-    title: "M-Pesa collection, auto-reconciled",
-    link: "/register",
-    thumbnail: "https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=600&q=80",
-  },
-  {
-    title: "NIDA-linked verified listings",
-    link: "/register",
-    thumbnail: "https://images.unsplash.com/photo-1586880244406-556ebe35f282?w=600&q=80",
-  },
-  {
-    title: "Tenant maintenance requests, tracked",
-    link: "/register",
-    thumbnail: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&q=80",
-  },
-  {
-    title: "Amenities checklist per unit",
-    link: "/register",
-    thumbnail: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80",
-  },
-  {
-    title: "Every property, one dashboard",
-    link: "/register",
-    thumbnail: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80",
-  },
-  {
-    title: "Listing view-counts, so you know what's working",
-    link: "/register",
-    thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80",
-  },
-  {
-    title: "A free tenant portal included",
-    link: "/register",
-    thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80",
-  },
-  {
-    title: "Free for your first unit, priced per unit after",
-    link: "/register",
-    thumbnail: "https://images.unsplash.com/photo-1554469384-e58fac937c8c?w=600&q=80",
-  },
+// features that don't exist yet. Titles stay visible at all times; this is a
+// feature list people need to read, not a photo showcase.
+const LANDLORD_BENEFITS: { icon: typeof FileText; title: string; text: string }[] = [
+  { icon: FileText, title: "Digital leases", text: "Swahili and English templates, signed online with a full audit trail." },
+  { icon: CalendarClock, title: "Advance-rent schedules", text: "6 or 12-month advances modeled natively, with what's paid and due tracked automatically." },
+  { icon: Smartphone, title: "M-Pesa collection", text: "Tenants pay from their phone. Payments reconcile without spreadsheets." },
+  { icon: ShieldCheck, title: "Verified listings", text: "NIDA-linked identity badges so seekers know which listings are legitimate." },
+  { icon: Wrench, title: "Maintenance requests", text: "Tenants submit issues, landlords track and close them out." },
+  { icon: ListChecks, title: "Amenities checklist", text: "Set exactly what's included per unit, so listings stay accurate." },
+  { icon: LayoutDashboard, title: "One dashboard", text: "Every property and unit you manage, in a single place." },
+  { icon: Eye, title: "Listing view-counts", text: "See what's actually getting attention, not just what's listed." },
+  { icon: Users, title: "Free tenant portal", text: "Tenants get their own portal for leases and payments, at no cost." },
+  { icon: BadgePercent, title: "Free to start", text: "No charge for your first unit. Priced per unit after that." },
 ];
 
 export function Home() {
@@ -260,12 +223,40 @@ export function Home() {
         onCta={(_, i) => navigate(`/listings?property_type=${PROPERTY_TYPES[i].value}`)}
       />
 
-      {/* For landlords — every real benefit, as a 3D scroll-parallax grid */}
-      <HeroParallax
-        products={LANDLORD_BENEFITS}
-        title="Everything landlords are eased with"
-        subtitle="One place for leases, rent, and tenants — instead of spreadsheets, WhatsApp groups, and manual bank reconciliation."
-      />
+      {/* For landlords — every real benefit, as a plain readable grid.
+          A 3D hover-to-reveal parallax version of this lived here first, but
+          titles hidden until hover and a constant tilt made a feature list that
+          people need to actually read hard to use — swapped for calm fade-ins
+          with titles always visible. */}
+      <section className="relative overflow-hidden bg-surface py-14 lg:py-20">
+        <motion.div
+          className="pointer-events-none absolute -left-10 top-1/4 h-28 w-28 rounded-full bg-sun-400/20 blur-2xl"
+          animate={{ y: [0, 18, 0], rotate: [0, -8, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
+          <Reveal className="text-center">
+            <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">For landlords</p>
+            <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">
+              Everything you're <span className="font-display italic font-normal text-brand-600">eased</span> with
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-ink-500">
+              One place for leases, rent, and tenants — instead of spreadsheets, WhatsApp groups, and manual bank reconciliation.
+            </p>
+          </Reveal>
+          <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-5">
+            {LANDLORD_BENEFITS.map((b, i) => (
+              <Reveal key={b.title} delay={(i % 5) * 60}>
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                  <b.icon className="h-5 w-5" />
+                </span>
+                <h3 className="mt-3 text-sm font-semibold text-ink-900">{b.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{b.text}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA — slim bar */}
       <section className="border-t border-surface-border bg-surface-sunken py-10">
